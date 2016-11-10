@@ -13,6 +13,7 @@
          quasitemplate
          quasitemplate/loc
          define-template-metafunction
+         syntax-local-template-metafunction-introduce
          ??
          ?@)
 

@@ -210,3 +210,15 @@ track which syntax or datum pattern variables are bound.
       #`'#,(current-pvars))
     (get-pvars))
   '(y x))]])}
+
+@section{Extensions to @racketmodname[syntax/parse/experimental/template]}
+
+@defmodule[stxparse-info/parse/experimental/template]
+
+@defform[(syntax-local-template-introduce stx)]{
+ Like @racket[syntax-local-introduce], but for @tech{template metafunctions}.
+
+ This change is also available in the package
+ @racketmodname{backport-template-pr1514}. It has been submitted as a Pull
+ Request to Racket, but can be used in
+ @racketmodname[stxparse-info/parse/experimental/template] right away.}
