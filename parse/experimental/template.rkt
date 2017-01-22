@@ -432,7 +432,7 @@ instead of integers and integer vectors.
        (and (pair? v) (quotable? (car v)) (quotable? (cdr v)))
        (and (vector? v) (andmap quotable? (vector->list v)))
        (and (hash? v) (andmap quotable? (hash->list v)))
-       (and (prefab-struct-key v) (andmap quotable? (struct->list v)))))
+       (and (prefab-struct-key v) (andmap quotable? (cdr (vector->list (struct->vector v)))))))
 
  (define (cons-guide g1 g2)
    (if (and (eq? g1 '_) (eq? g2 '_)) '_ (cons g1 g2)))
