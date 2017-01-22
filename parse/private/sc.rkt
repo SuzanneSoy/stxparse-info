@@ -6,7 +6,7 @@
 ;; keep and keep as abs. path -- lazy-loaded macros produce references to this
 ;; must be required via *absolute module path* from any disappearing module
 ;; (so for consistency etc, require absolutely from all modules)
-(require syntax/parse/private/residual
+(require stxparse-info/parse/private/residual
          racket/syntax
          racket/stxparam
          syntax/stx)
@@ -16,7 +16,7 @@
   ;; load macro transformers lazily via identifier
   ;; This module path must also be absolute (not sure why,
   ;; but it definitely breaks on relative module path).
-  [syntax/parse/private/parse-aux
+  [stxparse-info/parse/private/parse-aux
    (id:define-syntax-class
     id:define-splicing-syntax-class
     id:define-integrable-syntax-class
@@ -29,7 +29,7 @@
 ;; FIXME: workaround for phase>0 bug in racket/runtime-path (and thus lazy-require)
 ;; Without this, dependencies don't get collected.
 (require racket/runtime-path (for-meta 2 '#%kernel))
-(define-runtime-module-path-index _unused_ 'syntax/parse/private/parse-aux)
+(define-runtime-module-path-index _unused_ 'stxparse-info/parse/private/parse-aux)
 
 (provide define-syntax-class
          define-splicing-syntax-class

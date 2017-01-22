@@ -1,8 +1,8 @@
 #lang racket/base
 (require (for-template racket/base
-                       syntax/parse/private/keywords
-                       syntax/parse/private/residual ;; keep abs. path
-                       syntax/parse/private/runtime)
+                       stxparse-info/parse/private/keywords
+                       stxparse-info/parse/private/residual ;; keep abs. path
+                       stxparse-info/parse/private/runtime)
          racket/list
          racket/contract/base
          "make.rkt"
@@ -16,7 +16,7 @@
          "rep-attrs.rkt"
          "rep-data.rkt"
          "rep-patterns.rkt"
-         syntax/parse/private/residual-ct ;; keep abs. path
+         stxparse-info/parse/private/residual-ct ;; keep abs. path
          "kws.rkt")
 
 ;; Error reporting

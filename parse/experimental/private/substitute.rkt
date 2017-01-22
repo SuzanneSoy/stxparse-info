@@ -1,5 +1,5 @@
 #lang racket/base
-(require syntax/parse/private/minimatch
+(require stxparse-info/parse/private/minimatch
          racket/private/promise
          racket/private/stx) ;; syntax/stx
 (provide translate)
@@ -444,7 +444,7 @@ An VarRef is one of
                    [else
                     (err/not-syntax ctx v0)]))])))
 
-;; Note: slightly different from error msg in syntax/parse/private/residual:
+;; Note: slightly different from error msg in stxparse-info/parse/private/residual:
 ;; here says "contains" instead of "is bound to", because might be within list
 (define (err/not-syntax ctx v)
   (raise-syntax-error #f

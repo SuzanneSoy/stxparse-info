@@ -8,8 +8,8 @@
 ;; Compile-time
 
 (require (for-syntax racket/private/sc
-                     syntax/parse/private/residual-ct))
-(provide (for-syntax (all-from-out syntax/parse/private/residual-ct)))
+                     stxparse-info/parse/private/residual-ct))
+(provide (for-syntax (all-from-out stxparse-info/parse/private/residual-ct)))
 
 (begin-for-syntax
   ;; == from runtime.rkt

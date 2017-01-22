@@ -3,7 +3,7 @@
          racket/dict
          syntax/private/id-table
          racket/syntax
-         syntax/parse/private/residual-ct ;; keep abs. path
+         stxparse-info/parse/private/residual-ct ;; keep abs. path
          "minimatch.rkt"
          "kws.rkt")
 ;; from residual.rkt

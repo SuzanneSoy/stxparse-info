@@ -1,10 +1,10 @@
 #lang racket/base
 (require (for-syntax racket/base
-                     syntax/parse
+                     stxparse-info/parse
                      "private/sc.rkt"))
 (provide define-simple-macro
          define-syntax-parser
-         (for-syntax (all-from-out syntax/parse)))
+         (for-syntax (all-from-out stxparse-info/parse)))
 
 (define-syntax (define-simple-macro stx)
   (syntax-parse stx

@@ -5,12 +5,12 @@
                      "lib.rkt"
                      "kws.rkt"
                      racket/syntax)
-         syntax/parse/private/residual-ct ;; keep abs. path
-         syntax/parse/private/residual)   ;; keep abs. path
+         stxparse-info/parse/private/residual-ct ;; keep abs. path
+         stxparse-info/parse/private/residual)   ;; keep abs. path
 (begin-for-syntax
  (lazy-require
   [syntax/private/keyword (options-select-value parse-keyword-options)]
-  [syntax/parse/private/rep ;; keep abs. path
+  [stxparse-info/parse/private/rep ;; keep abs. path
    (parse-kw-formals
     check-conventions-rules
     check-datum-literals-list
@@ -18,7 +18,7 @@
 ;; FIXME: workaround for phase>0 bug in racket/runtime-path (and thus lazy-require)
 ;; Without this, dependencies don't get collected.
 (require racket/runtime-path racket/syntax (for-meta 2 '#%kernel))
-(define-runtime-module-path-index _unused_ 'syntax/parse/private/rep)
+(define-runtime-module-path-index _unused_ 'stxparse-info/parse/private/rep)
 
 (provide define-conventions
          define-literal-set
@@ -215,7 +215,7 @@ change between when define-literal-set is compiled and the comparison
 involving L. For example:
 
   (module M racket
-    (require syntax/parse)
+    (require stxparse-info/parse)
     (define-literal-set LS (lambda))
     (require (only-in some-other-lang lambda))
     .... LS ....)

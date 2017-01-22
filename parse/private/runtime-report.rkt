@@ -5,7 +5,7 @@
          racket/struct
          syntax/srcloc
          "minimatch.rkt"
-         syntax/parse/private/residual
+         stxparse-info/parse/private/residual
          "kws.rkt")
 (provide call-current-failure-handler
          current-failure-handler

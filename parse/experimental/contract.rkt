@@ -1,8 +1,8 @@
 #lang racket/base
-(require syntax/parse/pre
+(require stxparse-info/parse/pre
          "provide.rkt"
          syntax/contract
-         (only-in syntax/parse/private/residual ;; keep abs. path
+         (only-in stxparse-info/parse/private/residual ;; keep abs. path
                   this-context-syntax
                   this-role)
          racket/contract/base)

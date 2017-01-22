@@ -2,11 +2,11 @@
 (require (for-syntax racket/base
                      "dset.rkt"
                      racket/syntax
-                     syntax/parse/private/minimatch
+                     stxparse-info/parse/private/minimatch
                      racket/private/stx ;; syntax/stx
                      racket/private/sc
                      racket/struct)
-         syntax/parse/private/residual
+         stxparse-info/parse/private/residual
          "private/substitute.rkt")
 (provide template
          template/loc

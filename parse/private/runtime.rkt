@@ -1,6 +1,6 @@
 #lang racket/base
 (require racket/stxparam
-         syntax/parse/private/residual ;; keep abs. path
+         stxparse-info/parse/private/residual ;; keep abs. path
          (for-syntax racket/base
                      racket/list
                      syntax/kerncase
