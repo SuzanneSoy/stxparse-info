@@ -20,16 +20,16 @@ env:
     # Supply more than one RACKET_VERSION (as in the example below) to
     # create a Travis-CI build matrix to test against multiple Racket
     # versions.
-    - RACKET_VERSION=6.0
-    - RACKET_VERSION=6.1
-    - RACKET_VERSION=6.1.1
-    - RACKET_VERSION=6.2
-    - RACKET_VERSION=6.3
-    - RACKET_VERSION=6.4
-    - RACKET_VERSION=6.5
-    - RACKET_VERSION=6.6
-    - RACKET_VERSION=6.7
-    - RACKET_VERSION=HEAD
+    - RACKET_VERSION=6.0   RECENT=false
+    - RACKET_VERSION=6.1   RECENT=false
+    - RACKET_VERSION=6.1.1 RECENT=true
+    - RACKET_VERSION=6.2   RECENT=true
+    - RACKET_VERSION=6.3   RECENT=true
+    - RACKET_VERSION=6.4   RECENT=true
+    - RACKET_VERSION=6.5   RECENT=true
+    - RACKET_VERSION=6.6   RECENT=true
+    - RACKET_VERSION=6.7   RECENT=true
+    - RACKET_VERSION=HEAD  RECENT=true
 
 matrix:
   allow_failures:
@@ -51,8 +51,10 @@ before_script:
 # packages without it getting stuck on a confirmation prompt.
 script:
  - raco test -x -p stxparse-info
+ - raco setup --check-pkg-deps --pkgs stxparse-info
+ - raco pkg install --deps search-auto doc-coverage
+ - raco doc-coverage stxparse-info/current-pvars
+ - if $RECENT; then raco pkg install --deps search-auto cover cover-codecov; fi
+ - if $RECENT; then raco cover -b -f codecov -d $TRAVIS_BUILD_DIR/coverage .; fi
 
 after_success:
- - raco setup --check-pkg-deps --pkgs stxparse-info
- - raco pkg install --deps search-auto cover cover-coveralls
- - raco cover -b -f coveralls -d $TRAVIS_BUILD_DIR/coverage .

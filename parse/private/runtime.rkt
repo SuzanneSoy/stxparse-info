@@ -1,6 +1,7 @@
 #lang racket/base
 (require racket/stxparam
          stxparse-info/parse/private/residual ;; keep abs. path
+         stxparse-info/current-pvars
          (for-syntax racket/base
                      racket/list
                      syntax/kerncase
@@ -95,14 +96,15 @@ residual.rkt.
                     (map parse-attr (syntax->list #'(a ...)))])
        (with-syntax ([(vtmp ...) (generate-temporaries #'(name ...))]
                      [(stmp ...) (generate-temporaries #'(name ...))])
-         #'(letrec-syntaxes+values
-               ([(stmp) (make-attribute-mapping (quote-syntax vtmp)
-                                                'name 'depth 'syntax?)] ...)
-               ([(vtmp) value] ...)
+         #'(with-pvars (name ...)
              (letrec-syntaxes+values
-                 ([(name) (make-syntax-mapping 'depth (quote-syntax stmp))] ...)
-                 ()
-               . body))))]))
+                 ([(stmp) (make-attribute-mapping (quote-syntax vtmp)
+                                                  'name 'depth 'syntax?)] ...)
+                 ([(vtmp) value] ...)
+               (letrec-syntaxes+values
+                   ([(name) (make-syntax-mapping 'depth (quote-syntax stmp))] ...)
+                   ()
+                 . body)))))]))
 
 ;; (let-attributes* (([id num] ...) (expr ...)) expr) : expr
 ;; Special case: empty attrs need not match number of value exprs.
