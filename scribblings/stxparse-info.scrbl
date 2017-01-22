@@ -38,7 +38,7 @@ know which syntax pattern variables are within scope.
 
  @racketblock[(with-pvars (v₁ v₂ v₃) . body)]
  
- a call to the for-syntax function @racket[(current-pvars)] returns;
+ a call to the for-syntax function @racket[(current-pvars)] returns:
 
  @racketblock[(list* (quote-syntax v₃) (quote-syntax v₂) (quote-syntax v₁)
                      old-current-pvars)]
