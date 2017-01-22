@@ -45,4 +45,21 @@ know which syntax pattern variables are within scope.
 
  This can be used to implement macros which work similarly to
  @racket[syntax-parse] or @racket[syntax-case], and have them record the syntax
- pattern variables which they bind.}
+ pattern variables which they bind.
+
+ Note that the identifiers @racket[pvar ...] must already be bound to syntax
+ pattern variables when @racket[with-pvars] is used, e.g.
+
+ @racketblock[
+ (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
+              [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
+   (with-pvars (v₁ v₂)
+     code))]
+
+ instead of:
+
+ @racketblock[
+ (with-pvars (v₁ v₂)
+   (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
+                [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
+     code))]}

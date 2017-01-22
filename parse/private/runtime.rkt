@@ -96,14 +96,14 @@ residual.rkt.
                     (map parse-attr (syntax->list #'(a ...)))])
        (with-syntax ([(vtmp ...) (generate-temporaries #'(name ...))]
                      [(stmp ...) (generate-temporaries #'(name ...))])
-         #'(with-pvars (name ...)
+         #'(letrec-syntaxes+values
+               ([(stmp) (make-attribute-mapping (quote-syntax vtmp)
+                                                'name 'depth 'syntax?)] ...)
+               ([(vtmp) value] ...)
              (letrec-syntaxes+values
-                 ([(stmp) (make-attribute-mapping (quote-syntax vtmp)
-                                                  'name 'depth 'syntax?)] ...)
-                 ([(vtmp) value] ...)
-               (letrec-syntaxes+values
-                   ([(name) (make-syntax-mapping 'depth (quote-syntax stmp))] ...)
-                   ()
+                 ([(name) (make-syntax-mapping 'depth (quote-syntax stmp))] ...)
+                 ()
+               (with-pvars (name ...)
                  . body)))))]))
 
 ;; (let-attributes* (([id num] ...) (expr ...)) expr) : expr
