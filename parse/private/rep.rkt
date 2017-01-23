@@ -6,18 +6,18 @@
          racket/list
          racket/contract/base
          "make.rkt"
-         "minimatch.rkt"
+         syntax/parse/private/minimatch
          syntax/private/id-table
          syntax/stx
          syntax/keyword
          racket/syntax
          racket/struct
          "txlift.rkt"
-         "rep-attrs.rkt"
-         "rep-data.rkt"
-         "rep-patterns.rkt"
-         stxparse-info/parse/private/residual-ct ;; keep abs. path
-         "kws.rkt")
+         syntax/parse/private/rep-attrs
+         syntax/parse/private/rep-data
+         syntax/parse/private/rep-patterns
+         syntax/parse/private/residual-ct ;; keep abs. path
+         syntax/parse/private/kws)
 
 ;; Error reporting
 ;; All entry points should have explicit, mandatory #:context arg

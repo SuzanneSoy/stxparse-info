@@ -8,8 +8,8 @@
 ;; Compile-time
 
 (require (for-syntax racket/private/sc
-                     stxparse-info/parse/private/residual-ct))
-(provide (for-syntax (all-from-out stxparse-info/parse/private/residual-ct)))
+                     syntax/parse/private/residual-ct))
+(provide (for-syntax (all-from-out syntax/parse/private/residual-ct)))
 
 (begin-for-syntax
   ;; == from runtime.rkt
@@ -21,7 +21,14 @@
           attribute-mapping-depth
           attribute-mapping-syntax?)
 
- (define-struct attribute-mapping (var name depth syntax?)
+ (require (only-in (for-template syntax/parse/private/residual)
+                   make-attribute-mapping
+                   attribute-mapping?
+                   attribute-mapping-var
+                   attribute-mapping-name
+                   attribute-mapping-depth
+                   attribute-mapping-syntax?))
+ #;(define-struct attribute-mapping (var name depth syntax?)
    #:omit-define-syntaxes
    #:property prop:procedure
    (lambda (self stx)

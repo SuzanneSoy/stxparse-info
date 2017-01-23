@@ -4,10 +4,10 @@
          syntax/location
          (for-syntax racket/base
                      racket/syntax
-                     "../private/minimatch.rkt"
+                     syntax/parse/private/minimatch
                      stxparse-info/parse/pre
-                     stxparse-info/parse/private/residual-ct ;; keep abs. path
-                     "../private/kws.rkt"
+                     syntax/parse/private/residual-ct ;; keep abs. path
+                     syntax/parse/private/kws
                      syntax/contract))
 (provide provide-syntax-class/contract
          syntax-class/c

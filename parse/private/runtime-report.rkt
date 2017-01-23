@@ -4,9 +4,9 @@
          syntax/stx
          racket/struct
          syntax/srcloc
-         "minimatch.rkt"
+         syntax/parse/private/minimatch
          stxparse-info/parse/private/residual
-         "kws.rkt")
+         syntax/parse/private/kws)
 (provide call-current-failure-handler
          current-failure-handler
          invert-failure

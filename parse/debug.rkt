@@ -2,9 +2,9 @@
 (require (for-syntax racket/base
                      syntax/stx
                      racket/syntax
-                     "private/rep-data.rkt"
+                     syntax/parse/private/rep-data
                      "private/rep.rkt"
-                     "private/kws.rkt")
+                     syntax/parse/private/kws)
          racket/list
          racket/pretty
          "../parse.rkt"
@@ -13,7 +13,7 @@
          "private/runtime.rkt"
          "private/runtime-progress.rkt"
          "private/runtime-report.rkt"
-         "private/kws.rkt")
+         syntax/parse/private/kws)
 
 ;; No lazy loading for this module's dependencies.
 

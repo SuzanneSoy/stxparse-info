@@ -3,9 +3,9 @@
                      racket/lazy-require
                      "sc.rkt"
                      "lib.rkt"
-                     "kws.rkt"
+                     syntax/parse/private/kws
                      racket/syntax)
-         stxparse-info/parse/private/residual-ct ;; keep abs. path
+         syntax/parse/private/residual-ct ;; keep abs. path
          stxparse-info/parse/private/residual)   ;; keep abs. path
 (begin-for-syntax
  (lazy-require

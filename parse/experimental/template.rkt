@@ -2,7 +2,7 @@
 (require (for-syntax racket/base
                      "dset.rkt"
                      racket/syntax
-                     stxparse-info/parse/private/minimatch
+                     syntax/parse/private/minimatch
                      racket/private/stx ;; syntax/stx
                      racket/private/sc
                      racket/struct)

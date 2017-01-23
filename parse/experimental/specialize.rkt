@@ -1,8 +1,8 @@
 #lang racket/base
 (require (for-syntax racket/base
                      racket/syntax
-                     "../private/kws.rkt"
-                     "../private/rep-data.rkt"
+                     syntax/parse/private/kws
+                     syntax/parse/private/rep-data
                      "../private/rep.rkt")
          "../private/runtime.rkt")
 (provide define-syntax-class/specialize)

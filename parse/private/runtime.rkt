@@ -8,7 +8,7 @@
                      syntax/strip-context
                      racket/private/sc
                      racket/syntax
-                     "rep-data.rkt"))
+                     syntax/parse/private/rep-data))
 
 (provide with
          fail-handler

@@ -4,12 +4,12 @@
                      syntax/private/id-table
                      syntax/keyword
                      racket/syntax
-                     "minimatch.rkt"
-                     "rep-attrs.rkt"
-                     "rep-data.rkt"
-                     "rep-patterns.rkt"
+                     syntax/parse/private/minimatch
+                     syntax/parse/private/rep-attrs
+                     syntax/parse/private/rep-data
+                     syntax/parse/private/rep-patterns
                      "rep.rkt"
-                     "kws.rkt"
+                     syntax/parse/private/kws
                      "opt.rkt"
                      "txlift.rkt")
          "keywords.rkt"

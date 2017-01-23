@@ -12,7 +12,7 @@
 
 (begin-for-syntax
   (require racket/contract/base
-           stxparse-info/parse/private/residual-ct)
+           syntax/parse/private/residual-ct)
   (provide pattern-expander?
            (contract-out
             [pattern-expander

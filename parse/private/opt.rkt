@@ -1,10 +1,10 @@
 #lang racket/base
 (require racket/syntax
          racket/pretty
-         stxparse-info/parse/private/residual-ct ;; keep abs. path
-         "minimatch.rkt"
-         "rep-patterns.rkt"
-         "kws.rkt")
+         syntax/parse/private/residual-ct ;; keep abs. path
+         syntax/parse/private/minimatch
+         syntax/parse/private/rep-patterns
+         syntax/parse/private/kws)
 (provide (struct-out pk1)
          (rename-out [optimize-matrix0 optimize-matrix]))
 

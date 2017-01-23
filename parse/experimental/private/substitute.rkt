@@ -1,5 +1,5 @@
 #lang racket/base
-(require stxparse-info/parse/private/minimatch
+(require syntax/parse/private/minimatch
          racket/private/promise
          racket/private/stx) ;; syntax/stx
 (provide translate)

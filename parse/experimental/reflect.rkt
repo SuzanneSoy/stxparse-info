@@ -2,21 +2,21 @@
 (require (for-syntax racket/base
                      racket/lazy-require
                      racket/syntax
-                     stxparse-info/parse/private/residual-ct) ;; keep abs.path
+                     syntax/parse/private/residual-ct) ;; keep abs.path
          racket/contract/base
          racket/contract/combinator
-         "../private/minimatch.rkt"
+         syntax/parse/private/minimatch
          "../private/keywords.rkt"
          "../private/runtime-reflect.rkt"
-         "../private/kws.rkt")
+         syntax/parse/private/kws)
 (begin-for-syntax
  (lazy-require
-  [stxparse-info/parse/private/rep-data ;; keep abs. path
+  [syntax/parse/private/rep-data ;; keep abs. path
    (get-stxclass)]))
 ;; FIXME: workaround for phase>0 bug in racket/runtime-path (and thus lazy-require)
 ;; Without this, dependencies don't get collected.
 (require racket/runtime-path (for-meta 2 '#%kernel))
-(define-runtime-module-path-index _unused_ 'stxparse-info/parse/private/rep-data)
+(define-runtime-module-path-index _unused_ 'syntax/parse/private/rep-data)
 
 (define-syntax (reify-syntax-class stx)
   (if (eq? (syntax-local-context) 'expression)

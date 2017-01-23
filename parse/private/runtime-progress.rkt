@@ -1,6 +1,6 @@
 #lang racket/base
 (require racket/list
-         "minimatch.rkt")
+         syntax/parse/private/minimatch)
 (provide ps-empty
          ps-add-car
          ps-add-cdr
