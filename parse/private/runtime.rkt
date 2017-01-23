@@ -139,7 +139,8 @@ residual.rkt.
                                             'name 'depth 'syntax?))
                   ...
                   (define-syntax name (make-syntax-mapping 'depth (quote-syntax stmp)))
-                  ...)))]))
+                  ...
+                  (define-pvars name ...))))]))
 
 (define-syntax-rule (phase-of-enclosing-module)
   (variable-reference->module-base-phase

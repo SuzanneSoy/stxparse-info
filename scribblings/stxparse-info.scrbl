@@ -7,6 +7,8 @@
  @racketmodname[syntax/parse]}
 @author[@author+email["Georges Dupéron" "georges.duperon@gmail.com"]]
 
+Source code: @url{https://github.com/jsmaniac/stxparse-info}
+
 @defmodule[stxparse-info/parse]
 
 The module @racketmodname[stxparse-info/parse] is a patched version of
