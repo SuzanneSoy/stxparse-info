@@ -1,7 +1,11 @@
 #lang scribble/manual
 @require[@for-label[stxparse-info/parse
                     stxparse-info/current-pvars
-                    racket/base]]
+                    racket/syntax
+                    racket/base]
+         scribble/example]
+
+@(define ev ((make-eval-factory '(racket))))
 
 @title{stxparse-info : tracking bound syntax pattern variables with
  @racketmodname[syntax/parse]}
@@ -65,3 +69,35 @@ know which syntax pattern variables are within scope.
    (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
                 [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
      code))]}
+
+@defform[(define-pvars (pvar ...))
+         #:contracts ([pvar identifier?])]{
+                                           
+ Prepends the given @racket[pvar ...] to the list of pattern variables which
+ are known to be bound, in the same way as @racket[with-pvars]. Whereas
+ @racket[with-pvars] makes the modified list visible in the @racket[_body],
+ @racket[define-pvars] makes the modified list visible in the statements
+ following @racket[define-pvars]. @racket[define-pvars] can be used multiple
+ times within the same @racket[let] or equivalent.
+
+ This can be used to implement macros which work similarly to
+ @racket[define/syntax-parse] or @racket[define/with-syntax], and have them
+ record the syntax pattern variables which they bind.
+
+ @examples[#:eval ev
+           #:hidden
+           (require stxparse-info/parse
+                    stxparse-info/current-pvars
+                    racket/syntax
+                    (for-syntax racket/base))]
+ 
+ @examples[#:eval ev
+           #:escape UNSYNTAX
+           (let ()
+             (code:comment "Alternate version of define/syntax-parse which")
+             (code:comment "contains (define-pvars (x)) in its expanded form.")
+             (define/syntax-parse x #'1)
+             (define/syntax-parse y #'2)
+             (define-syntax (get-pvars stx)
+               #`'#,(current-pvars))
+             (get-pvars))]}

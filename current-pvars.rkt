@@ -125,7 +125,7 @@
           (raise-syntax-error 'with-pvars "bad syntax" stx)
           (void))
       (let* ([pvars (syntax->list (stx-car (stx-cdr stx)))]
-             [quoted-pvars (map (λ (v) `(quote-syntax ,v)) pvars)]
+             [quoted-pvars (reverse (map (λ (v) `(quote-syntax ,v)) pvars))]
              [body (stx-cdr (stx-cdr stx))]
              [old-pvars-index (find-last-current-pvars)]
              [old-pvars (try-nth-current-pvars old-pvars-index)]
@@ -154,7 +154,7 @@
           (raise-syntax-error 'with-pvars "bad syntax" stx)
           (void))
       (let* ([pvars (syntax->list (stx-cdr stx))]
-             [quoted-pvars (map (λ (v) `(quote-syntax ,v)) pvars)]
+             [quoted-pvars (reverse (map (λ (v) `(quote-syntax ,v)) pvars))]
              [old-pvars-index (find-last-current-pvars)]
              [old-pvars (try-nth-current-pvars old-pvars-index)]
              [binding (syntax-local-identifier-as-binding
