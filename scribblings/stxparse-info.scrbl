@@ -3,9 +3,15 @@
                     stxparse-info/current-pvars
                     racket/syntax
                     racket/base]
-         scribble/example]
+         version-case
+         @for-syntax[racket/base]]
 
-@(define ev ((make-eval-factory '(racket))))
+@(version-case 
+  [(version< (version) "6.4")
+   ]
+  [else
+   (require scribble/example)
+   (define ev ((make-eval-factory '(racket))))])
 
 @title{stxparse-info : tracking bound syntax pattern variables with
  @racketmodname[syntax/parse]}
@@ -60,15 +66,15 @@ know which syntax pattern variables are within scope.
  (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
               [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
    (with-pvars (v₁ v₂)
-     code))]
+               code))]
 
  instead of:
 
  @racketblock[
  (with-pvars (v₁ v₂)
-   (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
-                [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
-     code))]}
+             (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
+                          [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
+               code))]}
 
 @defform[(define-pvars (pvar ...))
          #:contracts ([pvar identifier?])]{
@@ -84,20 +90,37 @@ know which syntax pattern variables are within scope.
  @racket[define/syntax-parse] or @racket[define/with-syntax], and have them
  record the syntax pattern variables which they bind.
 
- @examples[#:eval ev
-           #:hidden
-           (require stxparse-info/parse
-                    stxparse-info/current-pvars
-                    racket/syntax
-                    (for-syntax racket/base))]
+ @(version-case 
+   [(version< (version) "6.4")
+    @RACKETBLOCK[
+ (let ()
+   (code:comment "Alternate version of define/syntax-parse which")
+   (code:comment "contains (define-pvars (x)) in its expanded form.")
+   (define/syntax-parse x #'1)
+   (define/syntax-parse y #'2)
+   (define-syntax (get-pvars stx)
+     #`'#,(current-pvars))
+   (get-pvars))
+ (code:comment "=> '(y x)")]]
+   [else
+    @examples[
+ #:eval ev
+ #:hidden
+ (require stxparse-info/parse
+          stxparse-info/current-pvars
+          racket/syntax
+          (for-syntax racket/base))]
  
- @examples[#:eval ev
-           #:escape UNSYNTAX
-           (let ()
-             (code:comment "Alternate version of define/syntax-parse which")
-             (code:comment "contains (define-pvars (x)) in its expanded form.")
-             (define/syntax-parse x #'1)
-             (define/syntax-parse y #'2)
-             (define-syntax (get-pvars stx)
-               #`'#,(current-pvars))
-             (get-pvars))]}
+    @examples[
+ #:eval ev
+ #:escape UNSYNTAX
+ (eval:check
+  (let ()
+    (code:comment "Alternate version of define/syntax-parse which")
+    (code:comment "contains (define-pvars (x)) in its expanded form.")
+    (define/syntax-parse x #'1)
+    (define/syntax-parse y #'2)
+    (define-syntax (get-pvars stx)
+      #`'#,(current-pvars))
+    (get-pvars))
+  '(y x))]])}
