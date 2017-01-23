@@ -19,18 +19,35 @@
 
 Source code: @url{https://github.com/jsmaniac/stxparse-info}
 
-@defmodule[stxparse-info/parse]
+@defmodule[stxparse-info]
 
-The module @racketmodname[stxparse-info/parse] is a patched version of
-@racketmodname[syntax/parse] which tracks which syntax pattern variables are
-bound. This allows some libraries to change the way syntax pattern variables
-work.
+This library provides some patched versions of @racketmodname[syntax/parse]
+and the @racket[syntax-case] family. These patched versions track which syntax
+pattern variables are bound. This allows some libraries to change the way
+syntax pattern variables work.
 
 For example, @racketmodname[phc-graph/subtemplate] automatically derives
 temporary identifiers when a template contains @racket[yᵢ …], and @racket[xᵢ]
 is a pattern variable. To know from which @racket[varᵢ] the @racket[yᵢ …]
 identifiers must be derived, @racketmodname[phc-graph/subtemplate] needs to
 know which syntax pattern variables are within scope.
+
+@section{Tracking currently-bound pattern variables with @racket[syntax-parse]}
+
+@defmodule[stxparse-info/parse]
+
+The module @racketmodname[stxparse-info/parse] provides patched versions of
+@racketmodname[syntax/parse] @racketmodname[define/syntax-parse] which track
+which syntax pattern variables are bound.
+
+@section{Tracking currently-bound pattern variables with @racket[syntax-parse]}
+
+@defmodule[stxparse-info/case]
+
+The module @racketmodname[stxparse-info/case] provides patched versions of
+@racket[syntax-case], @racket[syntax-case*], @racket[with-syntax],
+@racket[define/with-syntax], @racket[datum-case] and @racket[with-datum] which
+track which syntax or datum pattern variables are bound.
 
 @section{Reading and updating the list of currently-bound pattern variables}
 
@@ -40,7 +57,12 @@ know which syntax pattern variables are within scope.
          (current-pvars) (listof identifier?)]{
  This for-syntax procedure returns the list of syntax pattern variables which
  are known to be bound. The most recently bound variables are at the beginning
- of the list.}
+ of the list.
+
+ It is the responsibility of the reader to check that the identifiers are
+ bound, and that they are bound to syntax pattern variables, for example using
+ @racket[identifier-binding] and @racket[syntax-pattern-variable?]. This allows
+ libraries to also track variables bound by match-like forms, for example.}
 
 @defform[(with-pvars (pvar ...) . body)
          #:contracts ([pvar identifier?])]{

@@ -1,5 +1,6 @@
 #lang racket/base
 (require (only-in "stxloc.rkt" syntax-case)
+         stxparse-info/current-pvars
          (for-syntax racket/base
                      racket/private/sc))
 (provide define/with-syntax
@@ -45,7 +46,8 @@
                       (values (pvar-value pvar) ...)))
                   (define-syntax pvar
                     (make-syntax-mapping 'depth (quote-syntax valvar)))
-                  ...)))]))
+                  ...
+                  (define-pvars (pvar ...)))))]))
 ;; Ryan: alternative name: define/syntax-pattern ??
 
 ;; auxiliary macro

@@ -4,6 +4,7 @@
 (module stxcase '#%kernel
   (#%require racket/private/stx racket/private/small-scheme '#%paramz '#%unsafe
              racket/private/ellipses
+             stxparse-info/current-pvars
              (for-syntax racket/private/stx racket/private/small-scheme
                          racket/private/member racket/private/sc '#%kernel))
 
@@ -484,9 +485,13 @@
                                              null
                                              (if fender
                                                  (list (quote-syntax if) fender
-                                                       answer
+                                                       (list (quote-syntax with-pvars)
+                                                             pattern-vars
+                                                             answer)
                                                        do-try-next)
-                                                 answer)))
+                                                 (list (quote-syntax with-pvars)
+                                                       pattern-vars
+                                                       answer))))
                                            do-try-next))])
                               (if fender
                                   (list
