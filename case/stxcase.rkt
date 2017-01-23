@@ -2,10 +2,10 @@
 ;; syntax-case and syntax
 
 (module stxcase '#%kernel
-  (#%require "stx.rkt" "small-scheme.rkt" '#%paramz '#%unsafe
-             "ellipses.rkt"
-             (for-syntax "stx.rkt" "small-scheme.rkt"
-                         "member.rkt" "sc.rkt" '#%kernel))
+  (#%require racket/private/stx racket/private/small-scheme '#%paramz '#%unsafe
+             racket/private/ellipses
+             (for-syntax racket/private/stx racket/private/small-scheme
+                         racket/private/member racket/private/sc '#%kernel))
 
   (-define (datum->syntax/shape orig datum)
      (if (syntax? datum)
@@ -600,5 +600,5 @@
   (-define-syntax syntax (lambda (stx) (gen-template stx #f)))
   (-define-syntax datum (lambda (stx) (gen-template stx #t)))
 
-  (#%provide (all-from "ellipses.rkt") syntax-case** syntax datum
+  (#%provide (all-from racket/private/ellipses) syntax-case** syntax datum
              (for-syntax syntax-pattern-variable?)))

@@ -1,5 +1,6 @@
 #lang racket/base
-(require (for-syntax racket/base
+(require (only-in "stxloc.rkt" syntax-case)
+         (for-syntax racket/base
                      racket/private/sc))
 (provide define/with-syntax
 

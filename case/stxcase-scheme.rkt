@@ -4,9 +4,11 @@
 ;;  check-duplicate-identifier, and assembles everything we have so far
 
 (module stxcase-scheme '#%kernel
-  (#%require "small-scheme.rkt" "stx.rkt" "stxcase.rkt" "with-stx.rkt" "stxloc.rkt"
-             (for-syntax '#%kernel "small-scheme.rkt" "stx.rkt" "stxcase.rkt"
-                         "stxloc.rkt"))
+  (#%require racket/private/small-scheme racket/private/stx "stxcase.rkt"
+             "with-stx.rkt" racket/private/stxloc
+             (for-syntax '#%kernel racket/private/small-scheme
+                         racket/private/stx "stxcase.rkt"
+                         racket/private/stxloc))
 
   (-define (check-duplicate-identifier names)
     (unless (and (list? names) (andmap identifier? names))
@@ -68,7 +70,8 @@
         (syntax-arm stx #f #t)
         (raise-argument-error 'syntax-protect "syntax?" stx)))
 
-  (#%provide syntax datum (all-from "with-stx.rkt") (all-from "stxloc.rkt") 
+  (#%provide syntax datum (all-from "with-stx.rkt")
+             (all-from racket/private/stxloc) 
              check-duplicate-identifier syntax-protect
              syntax-rules syntax-id-rules
              (for-syntax syntax-pattern-variable?)))

@@ -3,8 +3,8 @@
 ;; syntax/loc
 
 (module stxloc '#%kernel
-  (#%require "qq-and-or.rkt" "stxcase.rkt" "define-et-al.rkt"
-             (for-syntax '#%kernel "stxcase.rkt" "sc.rkt"))
+  (#%require racket/private/qq-and-or "stxcase.rkt" racket/private/define-et-al
+             (for-syntax '#%kernel "stxcase.rkt" racket/private/sc))
 
   (begin-for-syntax
     (define-values (transform-to-syntax-case**)
