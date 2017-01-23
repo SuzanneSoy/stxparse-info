@@ -46,7 +46,8 @@
 
 (require "runtime-progress.rkt"
          "3d-stx.rkt"
-         syntax/stx)
+         syntax/stx
+         stxparse-info/current-pvars)
 
 (provide (all-from-out "runtime-progress.rkt")
 
