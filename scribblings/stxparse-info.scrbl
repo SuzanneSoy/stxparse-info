@@ -13,15 +13,15 @@
    (require scribble/example)
    (define ev ((make-eval-factory '(racket))))])
 
-@title{stxparse-info : tracking bound syntax pattern variables with
- @racketmodname[syntax/parse]}
+@title{stxparse-info : Tracking bound syntax pattern variables with
+ @racket[syntax-parse] and @racket[syntax-case]}
 @author[@author+email["Georges Dupéron" "georges.duperon@gmail.com"]]
 
 Source code: @url{https://github.com/jsmaniac/stxparse-info}
 
 @defmodule[stxparse-info]
 
-This library provides some patched versions of @racketmodname[syntax/parse]
+This library provides some patched versions of @racket[syntax-parse]
 and the @racket[syntax-case] family. These patched versions track which syntax
 pattern variables are bound. This allows some libraries to change the way
 syntax pattern variables work.
@@ -40,7 +40,7 @@ The module @racketmodname[stxparse-info/parse] provides patched versions of
 @racketmodname[syntax/parse] @racketmodname[define/syntax-parse] which track
 which syntax pattern variables are bound.
 
-@section{Tracking currently-bound pattern variables with @racket[syntax-parse]}
+@section{Tracking currently-bound pattern variables with @racket[syntax-case]}
 
 @defmodule[stxparse-info/case]
 

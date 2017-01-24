@@ -22,9 +22,10 @@
             [syntax-local-syntax-parse-pattern-introduce
              (-> syntax? syntax?)]))
 
-  (define pattern-expander
+  (require (only-in (for-template syntax/parse) pattern-expander))
+  #;(define pattern-expander
     (let ()
-      (struct pattern-expander (proc) #:transparent
+      #;(struct pattern-expander (proc) #:transparent
         #:omit-define-syntaxes
         #:property prop:pattern-expander (λ (this) (pattern-expander-proc this)))
       pattern-expander)))

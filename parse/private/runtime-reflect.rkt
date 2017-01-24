@@ -12,10 +12,28 @@
 A Reified is
   (reified symbol ParserFunction nat (listof (list symbol nat)))
 |#
-(define-struct reified-base (name) #:transparent)
-(define-struct (reified reified-base) (parser arity signature))
-(define-struct (reified-syntax-class reified) ())
-(define-struct (reified-splicing-syntax-class reified) ())
+(require (only-in syntax/parse/private/runtime-reflect
+                  reified
+                  reified?
+                  reified-parser
+                  reified-arity
+                  reified-signature
+                  make-reified
+                  struct:reified
+                  
+                  reified-syntax-class
+                  reified-syntax-class?
+                  make-reified-syntax-class
+                  struct:reified-syntax-class
+                  
+                  reified-splicing-syntax-class
+                  reified-splicing-syntax-class?
+                  make-reified-splicing-syntax-class
+                  struct:reified-splicing-syntax-class))
+#;(define-struct reified-base (name) #:transparent)
+#;(define-struct (reified reified-base) (parser arity signature))
+#;(define-struct (reified-syntax-class reified) ())
+#;(define-struct (reified-splicing-syntax-class reified) ())
 
 (define (reflect-parser obj e-arity e-attrs splicing?)
   ;; e-arity represents single call; min and max are same

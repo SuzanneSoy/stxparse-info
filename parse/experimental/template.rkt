@@ -7,7 +7,7 @@
                      racket/private/sc
                      racket/struct)
          stxparse-info/parse/private/residual
-         "private/substitute.rkt")
+         syntax/parse/experimental/private/substitute)
 (provide template
          template/loc
          quasitemplate
@@ -15,6 +15,64 @@
          define-template-metafunction
          ??
          ?@)
+
+;; This is a bit ugly. Also, we can't extract the constructor for some reason
+;; (probably because it is a transformer binding, not a variable),
+;; so we require the original `define-template-metafunction` from
+;; syntax/parse/experimental/template to fulfill the defintition below.
+(require (only-in syntax/parse/experimental/template
+                  define-template-metafunction))
+(begin-for-syntax
+  (require "steal-metafunction.rkt")
+  (provide template-metafunction?
+           template-metafunction-var))
+#;(begin
+  (require (only-in syntax/parse/experimental/template
+                    define-template-metafunction))
+  (begin-for-syntax
+    (module extracted-template-metafunction racket/base
+      (require syntax/parse/experimental/template
+               (for-syntax racket/base))
+      (define-values (template-metafunction?
+                      ;template-metafunction
+                      template-metafunction-var)
+        (eval #'(begin
+                  (define-syntax (extract stx)
+                    ;; Use 3D syntax to return the value:
+                    #`(values #,template-metafunction?
+                              ;; Doesn't work, probably because it's a macro:
+                              ;#,template-metafunction
+                              #,template-metafunction-var))
+                  (extract))
+              (module->namespace 'syntax/parse/experimental/template)))
+      (provide template-metafunction?
+               ;template-metafunction
+               template-metafunction-var))
+
+    (require 'extracted-template-metafunction)
+    (provide template-metafunction?
+             template-metafunction-var)
+
+    ;; Tests:
+    #;(begin
+      (require rackunit)
+    
+      (require 'extracted-template-metafunction)
+      (require (for-meta 4 'extracted-template-metafunction))
+      (check-equal? (format "~a" template-metafunction?)
+                    "#<procedure:template-metafunction?>")
+          
+      (require (for-meta 1 racket/base))
+      (require (for-meta 2 racket/base))
+      (require (for-meta 3 racket/base))
+      (require (for-meta 4 racket/base))
+      (begin-for-syntax
+        (begin-for-syntax
+          (begin-for-syntax
+            (begin-for-syntax
+              (require rackunit)
+              (check-equal? (format "~a" template-metafunction?)
+                            "#<procedure:template-metafunction?>"))))))))
 
 #|
 To do:
@@ -185,7 +243,8 @@ instead of integers and integer vectors.
 
 ;; ============================================================
 
-(define-syntax (define-template-metafunction stx)
+
+#;(define-syntax (define-template-metafunction stx)
   (syntax-case stx ()
     [(dsm (id arg ...) . body)
      #'(dsm id (lambda (arg ...) . body))]
@@ -197,7 +256,9 @@ instead of integers and integer vectors.
                   (template-metafunction (quote-syntax internal-id)))))]))
 
 (begin-for-syntax
- (struct template-metafunction (var)))
+  ;; This struct is not declared here, but instead extracted from the official
+  ;; syntax/parse/experimental/template, at the top of this file.
+  #;(struct template-metafunction (var)))
 
 ;; ============================================================
 
