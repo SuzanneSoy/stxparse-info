@@ -1,5 +1,6 @@
 (module current-pvars '#%kernel
-  (#%provide (for-syntax current-pvars)
+  (#%provide (for-syntax current-pvars
+                         current-pvars+unique)
              with-pvars
              define-pvars)
   
@@ -40,6 +41,11 @@
   (define-syntaxes (current-pvars-param0) '())
 
   (begin-for-syntax
+    ;; (-> any/c (or/c (listof syntax?) #f))
+    (define-values (syntax*->list)
+      (λ (stxlist)
+        (syntax->list (datum->syntax #f stxlist))))
+    
     ;; (-> identifier? (or/c #f (listof identifier?)))
     (define-values (try-current-pvars)
       (λ (id)
@@ -111,6 +117,10 @@
     ;; (-> (listof identifier?))
     (define-values (current-pvars)
       (λ ()
+        (map car (try-nth-current-pvars (find-last-current-pvars)))))
+
+    (define-values (current-pvars+unique)
+      (λ ()
         (try-nth-current-pvars (find-last-current-pvars)))))
 
   ;; (with-pvars [pvar ...] . body)
@@ -119,13 +129,18 @@
       (if (not (and (stx-pair? stx)
                     (identifier? (stx-car stx))
                     (stx-pair? (stx-cdr stx))
-                    (syntax->list (stx-car (stx-cdr stx)))
+                    (syntax*->list (stx-car (stx-cdr stx)))
                     (andmap identifier?
-                            (syntax->list (stx-car (stx-cdr stx))))))
+                            (syntax*->list (stx-car (stx-cdr stx))))))
           (raise-syntax-error 'with-pvars "bad syntax" stx)
           (void))
-      (let* ([pvars (syntax->list (stx-car (stx-cdr stx)))]
-             [quoted-pvars (reverse (map (λ (v) `(quote-syntax ,v)) pvars))]
+      (let* ([pvars (reverse (syntax*->list (stx-car (stx-cdr stx))))]
+             [unique-at-runtime (map gensym (map syntax-e pvars))]
+             [stxquoted-pvars (map (λ (v unique)
+                                     `(cons (quote-syntax ,v)
+                                            (quote-syntax ,unique)))
+                                   pvars
+                                   unique-at-runtime)]
              [body (stx-cdr (stx-cdr stx))]
              [old-pvars-index (find-last-current-pvars)]
              [old-pvars (try-nth-current-pvars old-pvars-index)]
@@ -134,26 +149,31 @@
              [lower-bound-binding
               (syntax-local-identifier-as-binding
                (syntax-local-introduce
-                (quote-syntax current-pvars-index-lower-bound)))])
+                (quote-syntax current-pvars-index-lower-bound)))]
+             [do-unique-at-runtime (map (λ (id pvar)
+                                          `[(,id) (gensym (quote ,pvar))])
+                                        unique-at-runtime
+                                        pvars)])
         (datum->syntax
          (quote-syntax here)
-         `(letrec-syntaxes+values
-              ([(,binding) (list* ,@quoted-pvars
-                                  (try-nth-current-pvars ,old-pvars-index))]
-               [(,lower-bound-binding) ,(+ old-pvars-index 1)])
-              ()
-            . ,body)))))
+         `(let-values (,@do-unique-at-runtime)
+            (letrec-syntaxes+values
+                ([(,binding) (list* ,@stxquoted-pvars
+                                    (try-nth-current-pvars ,old-pvars-index))]
+                 [(,lower-bound-binding) ,(+ old-pvars-index 1)])
+                ()
+              . ,body))))))
 
   (define-syntaxes (define-pvars)
     (lambda (stx)
       (if (not (and (stx-pair? stx)
                     (identifier? (stx-car stx))
-                    (syntax->list (stx-cdr stx))
+                    (syntax*->list (stx-cdr stx))
                     (andmap identifier?
-                            (syntax->list (stx-cdr stx)))))
+                            (syntax*->list (stx-cdr stx)))))
           (raise-syntax-error 'with-pvars "bad syntax" stx)
           (void))
-      (let* ([pvars (syntax->list (stx-cdr stx))]
+      (let* ([pvars (syntax*->list (stx-cdr stx))]
              [quoted-pvars (reverse (map (λ (v) `(quote-syntax ,v)) pvars))]
              [old-pvars-index (find-last-current-pvars)]
              [old-pvars (try-nth-current-pvars old-pvars-index)]
