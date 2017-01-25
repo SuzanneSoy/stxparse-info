@@ -7,7 +7,7 @@
                      racket/private/sc
                      racket/struct)
          stxparse-info/parse/private/residual
-         syntax/parse/experimental/private/substitute)
+         "private/substitute.rkt")
 (provide template
          template/loc
          quasitemplate
