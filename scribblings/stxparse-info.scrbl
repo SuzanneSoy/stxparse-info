@@ -98,7 +98,7 @@ track which syntax or datum pattern variables are bound.
                           [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
                code))]}
 
-@defform[(define-pvars (pvar ...))
+@defform[(define-pvars pvar ...)
          #:contracts ([pvar identifier?])]{
                                            
  Prepends the given @racket[pvar ...] to the list of pattern variables which
@@ -117,7 +117,7 @@ track which syntax or datum pattern variables are bound.
     @RACKETBLOCK[
  (let ()
    (code:comment "Alternate version of define/syntax-parse which")
-   (code:comment "contains (define-pvars (x)) in its expanded form.")
+   (code:comment "contains (define-pvars x) in its expanded form.")
    (define/syntax-parse x #'1)
    (define/syntax-parse y #'2)
    (define-syntax (get-pvars stx)
@@ -139,7 +139,7 @@ track which syntax or datum pattern variables are bound.
  (eval:check
   (let ()
     (code:comment "Alternate version of define/syntax-parse which")
-    (code:comment "contains (define-pvars (x)) in its expanded form.")
+    (code:comment "contains (define-pvars x) in its expanded form.")
     (define/syntax-parse x #'1)
     (define/syntax-parse y #'2)
     (define-syntax (get-pvars stx)
