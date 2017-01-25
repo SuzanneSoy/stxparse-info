@@ -1,6 +1,6 @@
 #lang info
 (define collection "stxparse-info")
-(define deps '("base"
+(define deps '(("base" #:version "6.7.0.900")
                "rackunit-lib"
                ;; Because scribble/example is not available on v6.3:
                "version-case"))

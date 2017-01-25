@@ -24,11 +24,14 @@ env:
     #- RACKET_VERSION=6.1   RECENT=false
     #- RACKET_VERSION=6.1.1 RECENT=true
     #- RACKET_VERSION=6.2   RECENT=true
-    - RACKET_VERSION=6.3   RECENT=true
-    - RACKET_VERSION=6.4   RECENT=true
-    - RACKET_VERSION=6.5   RECENT=true
-    - RACKET_VERSION=6.6   RECENT=true
-    - RACKET_VERSION=6.7   RECENT=true
+    ### These versions use a different internal representation for syntax/parse structs,
+    ### since we are relying on them for compatibility, it's simpler to skip them.
+    ###- RACKET_VERSION=6.3   RECENT=true
+    ###- RACKET_VERSION=6.4   RECENT=true
+    ###- RACKET_VERSION=6.5   RECENT=true
+    ###- RACKET_VERSION=6.6   RECENT=true
+    ###- RACKET_VERSION=6.7   RECENT=true
+    - RACKET_VERSION=6.8   RECENT=true
     - RACKET_VERSION=HEAD  RECENT=true
 
 matrix:
