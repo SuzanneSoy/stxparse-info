@@ -1,3 +1,9 @@
+[![Build Status,](https://img.shields.io/travis/jsmaniac/stxparse-info/master.svg)](https://travis-ci.org/jsmaniac/stxparse-info)
+[![Coverage Status,](https://img.shields.io/codecov/c/github/jsmaniac/stxparse-info/master.svg)](https://codecov.io/gh/jsmaniac/stxparse-info)
+[![Build Stats,](https://img.shields.io/badge/build-stats-blue.svg)](http://jsmaniac.github.io/travis-stats/#jsmaniac/stxparse-info)
+[![Online Documentation,](https://img.shields.io/badge/docs-online-blue.svg)](http://docs.racket-lang.org/stxparse-info/)
+
+
 stxparse-info
 =============
 
