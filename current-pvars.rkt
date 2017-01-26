@@ -136,11 +136,11 @@
           (void))
       (let* ([pvars (reverse (syntax*->list (stx-car (stx-cdr stx))))]
              [unique-at-runtime (map gensym (map syntax-e pvars))]
-             [stxquoted-pvars (map (λ (v unique)
-                                     `(cons (quote-syntax ,v)
-                                            (quote-syntax ,unique)))
-                                   pvars
-                                   unique-at-runtime)]
+             [stxquoted-pvars+unique (map (λ (v unique)
+                                            `(cons (quote-syntax ,v)
+                                                   (quote-syntax ,unique)))
+                                          pvars
+                                          unique-at-runtime)]
              [body (stx-cdr (stx-cdr stx))]
              [old-pvars-index (find-last-current-pvars)]
              [old-pvars (try-nth-current-pvars old-pvars-index)]
@@ -158,10 +158,10 @@
          (quote-syntax here)
          `(let-values (,@do-unique-at-runtime)
             (letrec-syntaxes+values
-                ([(,binding) (list* ,@stxquoted-pvars
+                ([(,binding) (list* ,@stxquoted-pvars+unique
                                     (try-nth-current-pvars ,old-pvars-index))]
                  [(,lower-bound-binding) ,(+ old-pvars-index 1)])
-                ()
+              ()
               . ,body))))))
 
   (define-syntaxes (define-pvars)
@@ -173,8 +173,13 @@
                             (syntax*->list (stx-cdr stx)))))
           (raise-syntax-error 'with-pvars "bad syntax" stx)
           (void))
-      (let* ([pvars (syntax*->list (stx-cdr stx))]
-             [quoted-pvars (reverse (map (λ (v) `(quote-syntax ,v)) pvars))]
+      (let* ([pvars (reverse (syntax*->list (stx-cdr stx)))]
+             [unique-at-runtime (map gensym (map syntax-e pvars))]
+             [stxquoted-pvars+unique (map (λ (v unique)
+                                            `(cons (quote-syntax ,v)
+                                                   (quote-syntax ,unique)))
+                                          pvars
+                                          unique-at-runtime)]
              [old-pvars-index (find-last-current-pvars)]
              [old-pvars (try-nth-current-pvars old-pvars-index)]
              [binding (syntax-local-identifier-as-binding
@@ -182,5 +187,5 @@
         (datum->syntax
          (quote-syntax here)
          `(define-syntaxes (,binding)
-            (list* ,@quoted-pvars
+            (list* ,@stxquoted-pvars+unique
                    (try-nth-current-pvars ,old-pvars-index))))))))

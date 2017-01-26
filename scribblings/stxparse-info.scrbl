@@ -115,9 +115,9 @@ track which syntax or datum pattern variables are bound.
  (let ([my-valvar (quote-syntax x)])
    (let-syntax ([my-pvar (make-syntax-mapping 0 (quote-syntax my-valvar))])
      (with-pvars (x)
-       (get-current-pvars+unique)) (code:comment '([x . g123]))
+       (get-current-pvars+unique)) (code:comment "'([x . g123])")
      (with-pvars (x)
-                 (get-current-pvars+unique)))) (code:comment '([x . g124]))]
+                 (get-current-pvars+unique)))) (code:comment "'([x . g124])")]
 
  Under normal circumstances, @racket[with-pvars] @racket[define-pvars] should
  be called immediately after binding the syntax pattern variable, but the code

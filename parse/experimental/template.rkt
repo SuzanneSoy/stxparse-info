@@ -92,7 +92,13 @@ A HeadTemplate (H) is one of:
 (define-syntax (quasitemplate stx)
   (syntax-case stx ()
     [(quasitemplate t)
-     (do-template stx #'t #t #f)]))
+     (do-template stx #'t #t #f)]
+    [(quasitemplate t #:properties (prop ...))
+     (andmap identifier? (syntax->list #'(prop ...)))
+     (parameterize ((props-to-serialize (syntax->datum #'(prop ...)))
+                    (props-to-transfer (syntax->datum #'(prop ...))))
+       ;; Same as above
+       (do-template stx #'t #t #f))]))
 
 (define-syntaxes (template/loc quasitemplate/loc)
   ;; FIXME: better to replace unsyntax form, shrink template syntax constant
@@ -104,7 +110,16 @@ A HeadTemplate (H) is one of:
                 (syntax-arm
                  (with-syntax ([main-expr (do-template stx #'t quasi? #'loc-stx)])
                    #'(let ([loc-stx (handle-loc '?/loc loc-expr)])
-                       main-expr)))])))])
+                       main-expr)))]
+               [(?/loc loc-expr t #:properties (prop ...))
+                (andmap identifier? (syntax->list #'(prop ...)))
+                (parameterize ((props-to-serialize (syntax->datum #'(prop ...)))
+                               (props-to-transfer (syntax->datum #'(prop ...))))
+                  ;; Same as above
+                  (syntax-arm
+                   (with-syntax ([main-expr (do-template stx #'t quasi? #'loc-stx)])
+                     #'(let ([loc-stx (handle-loc '?/loc loc-expr)])
+                         main-expr))))])))])
     (values (make-tx #f) (make-tx #t))))
 
 (define (handle-loc who x)
