@@ -60,13 +60,16 @@ An VarRef is one of
 ;; Used to indicate absent pvar in template; ?? catches
 ;; Note: not an exn, don't need continuation marks
 (require (only-in rackunit require/expose))
-(require/expose syntax/parse/experimental/private/substitute
-                (absent-pvar
-                 absent-pvar?
-                 absent-pvar-ctx
-                 absent-pvar-v
-                 absent-pvar-wanted-list?))
-#;(struct absent-pvar (ctx v wanted-list?))
+#;(require/expose syntax/parse/experimental/private/substitute
+                  (absent-pvar
+                   absent-pvar?
+                   absent-pvar-ctx
+                   absent-pvar-v
+                   absent-pvar-wanted-list?))
+;; this struct is only used in this file, and is not exported, so I guess it's
+;; ok to not steal the struct from syntax/parse/experimental/private/substitute
+;; Furthermore, the require/expose above does not work reliably.
+(struct absent-pvar (ctx v wanted-list?))
 
 ;; ============================================================
 

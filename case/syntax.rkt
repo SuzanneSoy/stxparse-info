@@ -47,7 +47,7 @@
                   (define-syntax pvar
                     (make-syntax-mapping 'depth (quote-syntax valvar)))
                   ...
-                  (define-pvars (pvar ...)))))]))
+                  (define-pvars pvar ...))))]))
 ;; Ryan: alternative name: define/syntax-pattern ??
 
 ;; auxiliary macro

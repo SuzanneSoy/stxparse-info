@@ -1,5 +1,6 @@
 #lang racket
 (require stxparse-info/parse
+         stxparse-info/case
          stxparse-info/current-pvars
          racket/stxparam
          rackunit)
@@ -78,158 +79,188 @@
                                   (syntax->datum (ref-nth-pvar 1)))]))])
                 '(1 2 1)))
 
-;; tests for define/syntax-parse
+;; Tests for syntax-case
 (begin
-  (check-equal? (syntax-parse #'1
-                  [x
-                   #:with y #'2
-                   (define/syntax-parse z #'3)
+  (check-equal? (list-pvars)
+                '())
+
+  (check-equal? (syntax-case #'(1 (2 3) a b c) ()
+                  [(x (y ...) z ...)
                    (list-pvars)])
                 '(z y x))
 
-  (check-equal? (syntax-parse #'1
-                  [x
-                   #:with y #'2
-                   (define/syntax-parse z #'3)
-                   (list (syntax->datum (ref-nth-pvar 0))
-                         (syntax->datum (ref-nth-pvar 1))
-                         (syntax->datum (ref-nth-pvar 2)))])
-                '(3 2 1))
+  (check-equal? (list-pvars)
+                '())
 
   (check-equal? (syntax-parse #'1
                   [x
-                   #:with y #'2
-                   (define/syntax-parse x #'3)
-                   (list-pvars)])
-                '(x y x))
+                   (syntax->datum (ref-nth-pvar 0))])
+                1)
 
   (check-equal? (syntax-parse #'1
                   [x
-                   #:with y #'2
-                   (define/syntax-parse x #'3)
-                   (list (syntax->datum (ref-nth-pvar 0))
-                         (syntax->datum (ref-nth-pvar 1))
-                         (syntax->datum (ref-nth-pvar 2)))])
-                '(3 2 1))
+                   (cons (syntax->datum (ref-nth-pvar 0))
+                         (syntax-parse #'2
+                           [x
+                            (list (syntax->datum (ref-nth-pvar 0))
+                                  (syntax->datum (ref-nth-pvar 1)))]))])
+                '(1 2 1)))
 
-  (check-equal? (syntax-parse #'1
-                  [x
-                   #:with y #'2
-                   (define/syntax-parse x #'3)
-                   (define/syntax-parse y #'4)
-                   (list (syntax->datum (ref-nth-pvar 0))
-                         (syntax->datum (ref-nth-pvar 1))
-                         (syntax->datum (ref-nth-pvar 2))
-                         (syntax->datum (ref-nth-pvar 3)))])
-                '(4 3 2 1))
+;; tests for define/syntax-parse and define/syntax-case
+(define-syntax-rule (gen-test-define define/xxx)
+  (begin
+    (check-equal? (syntax-parse #'1
+                    [x
+                     #:with y #'2
+                     (define/xxx z #'3)
+                     (list-pvars)])
+                  '(z y x))
+
+    (check-equal? (syntax-parse #'1
+                    [x
+                     #:with y #'2
+                     (define/xxx z #'3)
+                     (list (syntax->datum (ref-nth-pvar 0))
+                           (syntax->datum (ref-nth-pvar 1))
+                           (syntax->datum (ref-nth-pvar 2)))])
+                  '(3 2 1))
+
+    (check-equal? (syntax-parse #'1
+                    [x
+                     #:with y #'2
+                     (define/xxx x #'3)
+                     (list-pvars)])
+                  '(x y x))
+
+    (check-equal? (syntax-parse #'1
+                    [x
+                     #:with y #'2
+                     (define/xxx x #'3)
+                     (list (syntax->datum (ref-nth-pvar 0))
+                           (syntax->datum (ref-nth-pvar 1))
+                           (syntax->datum (ref-nth-pvar 2)))])
+                  '(3 2 1))
+
+    (check-equal? (syntax-parse #'1
+                    [x
+                     #:with y #'2
+                     (define/xxx x #'3)
+                     (define/xxx y #'4)
+                     (list (syntax->datum (ref-nth-pvar 0))
+                           (syntax->datum (ref-nth-pvar 1))
+                           (syntax->datum (ref-nth-pvar 2))
+                           (syntax->datum (ref-nth-pvar 3)))])
+                  '(4 3 2 1))
   
-  (check-equal? (syntax-parse #'1
-                  [x
-                   #:with y #'2
-                   (define/syntax-parse x #'3)
-                   (define/syntax-parse y #'4)
-                   (define/syntax-parse z #'5)
-                   (list (syntax->datum (ref-nth-pvar 0))
-                         (syntax->datum (ref-nth-pvar 1))
-                         (syntax->datum (ref-nth-pvar 2))
-                         (syntax->datum (ref-nth-pvar 3))
-                         (syntax->datum (ref-nth-pvar 4)))])
-                '(5 4 3 2 1))
+    (check-equal? (syntax-parse #'1
+                    [x
+                     #:with y #'2
+                     (define/xxx x #'3)
+                     (define/xxx y #'4)
+                     (define/xxx z #'5)
+                     (list (syntax->datum (ref-nth-pvar 0))
+                           (syntax->datum (ref-nth-pvar 1))
+                           (syntax->datum (ref-nth-pvar 2))
+                           (syntax->datum (ref-nth-pvar 3))
+                           (syntax->datum (ref-nth-pvar 4)))])
+                  '(5 4 3 2 1))
 
-  (check-equal? (syntax-parse #'(1 2 3)
-                  [(x y z)
-                   (define/syntax-parse x #'4)
-                   (define/syntax-parse y #'5)
-                   (list (syntax->datum (ref-nth-pvar 0))
-                         (syntax->datum (ref-nth-pvar 1))
-                         (syntax->datum (ref-nth-pvar 2))
-                         (syntax->datum (ref-nth-pvar 3))
-                         (syntax->datum (ref-nth-pvar 4)))])
-                '(5 4 3 2 1))
+    (check-equal? (syntax-parse #'(1 2 3)
+                    [(x y z)
+                     (define/xxx x #'4)
+                     (define/xxx y #'5)
+                     (list (syntax->datum (ref-nth-pvar 0))
+                           (syntax->datum (ref-nth-pvar 1))
+                           (syntax->datum (ref-nth-pvar 2))
+                           (syntax->datum (ref-nth-pvar 3))
+                           (syntax->datum (ref-nth-pvar 4)))])
+                  '(5 4 3 2 1))
 
-  (check-equal? (syntax-parse #'(1 2 3)
-                  [(x y z)
-                   (define/syntax-parse x #'4)
-                   (define/syntax-parse y #'5)
-                   (list-pvars)])
-                '(y x z y x))
+    (check-equal? (syntax-parse #'(1 2 3)
+                    [(x y z)
+                     (define/xxx x #'4)
+                     (define/xxx y #'5)
+                     (list-pvars)])
+                  '(y x z y x))
 
-  ;; Test with nested let, less variables in the nested let
-  (check-equal? (let ()
-                  (define/syntax-parse w #'1)
-                  (define/syntax-parse x #'2)
-                  (define/syntax-parse y #'3)
-                  (define/syntax-parse z #'4)
-                  (list (list-pvars)
-                        (let ()
-                          (define/syntax-parse w #'5)
-                          (define/syntax-parse x #'6)
-                          (list-pvars))
-                        (list-pvars)))
-                '((z y x w) (x w z y x w) (z y x w)))
+    ;; Test with nested let, less variables in the nested let
+    (check-equal? (let ()
+                    (define/xxx w #'1)
+                    (define/xxx x #'2)
+                    (define/xxx y #'3)
+                    (define/xxx z #'4)
+                    (list (list-pvars)
+                          (let ()
+                            (define/xxx w #'5)
+                            (define/xxx x #'6)
+                            (list-pvars))
+                          (list-pvars)))
+                  '((z y x w) (x w z y x w) (z y x w)))
 
-  ;; Test with nested let, more variables in the nested let
-  (check-equal? (let ()
-                  (define/syntax-parse w #'1)
-                  (define/syntax-parse x #'2)
-                  (list (list-pvars)
-                        (let ()
-                          (define/syntax-parse w #'3)
-                          (define/syntax-parse x #'4)
-                          (define/syntax-parse y #'5)
-                          (define/syntax-parse z #'6)
-                          (list-pvars))
-                        (list-pvars)))
-                '((x w) (z y x w x w) (x w)))
+    ;; Test with nested let, more variables in the nested let
+    (check-equal? (let ()
+                    (define/xxx w #'1)
+                    (define/xxx x #'2)
+                    (list (list-pvars)
+                          (let ()
+                            (define/xxx w #'3)
+                            (define/xxx x #'4)
+                            (define/xxx y #'5)
+                            (define/xxx z #'6)
+                            (list-pvars))
+                          (list-pvars)))
+                  '((x w) (z y x w x w) (x w)))
 
-  (check-equal? (let ()
-                  (define/syntax-parse w #'1)
-                  (define/syntax-parse x #'2)
-                  (define/syntax-parse y #'3)
-                  (define/syntax-parse z #'4)
-                  (list (list-pvars)
-                        (syntax-parse #'5
-                          [k
-                           (define/syntax-parse w #'5)
-                           (define/syntax-parse x #'6)
-                           (list-pvars)])
-                        (list-pvars)))
-                '((z y x w) (x w k z y x w) (z y x w)))
+    (check-equal? (let ()
+                    (define/xxx w #'1)
+                    (define/xxx x #'2)
+                    (define/xxx y #'3)
+                    (define/xxx z #'4)
+                    (list (list-pvars)
+                          (syntax-parse #'5
+                            [k
+                             (define/xxx w #'5)
+                             (define/xxx x #'6)
+                             (list-pvars)])
+                          (list-pvars)))
+                  '((z y x w) (x w k z y x w) (z y x w)))
 
-  (check-equal? (let ()
-                  (define/syntax-parse w #'1)
-                  (define/syntax-parse x #'2)
-                  (list (list-pvars)
-                        (syntax-parse #'5
-                          [k
-                           (define/syntax-parse w #'3)
-                           (define/syntax-parse x #'4)
-                           (define/syntax-parse y #'5)
-                           (define/syntax-parse z #'6)
-                           (list-pvars)])
-                        (list-pvars)))
-                '((x w) (z y x w k x w) (x w)))
+    (check-equal? (let ()
+                    (define/xxx w #'1)
+                    (define/xxx x #'2)
+                    (list (list-pvars)
+                          (syntax-parse #'5
+                            [k
+                             (define/xxx w #'3)
+                             (define/xxx x #'4)
+                             (define/xxx y #'5)
+                             (define/xxx z #'6)
+                             (list-pvars)])
+                          (list-pvars)))
+                  '((x w) (z y x w k x w) (x w)))
 
-  (check-equal? (let ()
-                  (define/syntax-parse w #'1)
-                  (define/syntax-parse x #'2)
-                  (list (list-pvars)
-                        (syntax-parse #'5
-                          [k
-                           (define/syntax-parse w #'3)
-                           (define/syntax-parse x #'4)
-                           (define/syntax-parse y #'5)
-                           (define/syntax-parse z #'6)
-                           (list (list-pvars)
-                                 (syntax-parse #'5
-                                   [k
-                                    (define/syntax-parse x #'4)
-                                    (define/syntax-parse y #'4)
-                                    (list-pvars)])
-                                 (list-pvars))])
-                        (list-pvars)))
-                '((x w)
-                  ((z y x w k x w)
-                   (y x k z y x w k x w)
-                   (z y x w k x w))
-                  (x w))))
+    (check-equal? (let ()
+                    (define/xxx w #'1)
+                    (define/xxx x #'2)
+                    (list (list-pvars)
+                          (syntax-parse #'5
+                            [k
+                             (define/xxx w #'3)
+                             (define/xxx x #'4)
+                             (define/xxx y #'5)
+                             (define/xxx z #'6)
+                             (list (list-pvars)
+                                   (syntax-parse #'5
+                                     [k
+                                      (define/xxx x #'4)
+                                      (define/xxx y #'4)
+                                      (list-pvars)])
+                                   (list-pvars))])
+                          (list-pvars)))
+                  '((x w)
+                    ((z y x w k x w)
+                     (y x k z y x w k x w)
+                     (z y x w k x w))
+                    (x w)))))
+(gen-test-define define/syntax-parse)
+(gen-test-define define/with-syntax)
