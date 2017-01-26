@@ -12,7 +12,7 @@
                      syntax/parse/private/kws
                      "opt.rkt"
                      "txlift.rkt")
-         "keywords.rkt"
+         syntax/parse/private/keywords
          racket/syntax
          racket/stxparam
          syntax/stx

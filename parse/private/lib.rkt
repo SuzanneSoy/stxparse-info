@@ -1,6 +1,6 @@
 #lang racket/base
 (require "sc.rkt"
-         "keywords.rkt"
+         syntax/parse/private/keywords
          (for-syntax racket/base))
 
 (provide identifier

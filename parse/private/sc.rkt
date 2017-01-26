@@ -1,7 +1,7 @@
 #lang racket/base
 (require (for-syntax racket/base
                      racket/lazy-require)
-         "keywords.rkt")
+         syntax/parse/private/keywords)
 
 ;; keep and keep as abs. path -- lazy-loaded macros produce references to this
 ;; must be required via *absolute module path* from any disappearing module
@@ -38,7 +38,7 @@
          syntax-parser
          define/syntax-parse
 
-         (except-out (all-from-out "keywords.rkt")
+         (except-out (all-from-out syntax/parse/private/keywords)
                      ~reflect
                      ~splicing-reflect
                      ~eh-var)

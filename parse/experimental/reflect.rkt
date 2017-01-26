@@ -6,7 +6,7 @@
          racket/contract/base
          racket/contract/combinator
          syntax/parse/private/minimatch
-         "../private/keywords.rkt"
+         syntax/parse/private/keywords
          "../private/runtime-reflect.rkt"
          syntax/parse/private/kws)
 (begin-for-syntax
