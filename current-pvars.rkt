@@ -88,7 +88,7 @@
       (λ (lower upper)
         (if (= (- upper lower) 1)
             (if (try-nth-current-pvars upper)
-                upper
+                upper ;; Technically not possible, still included for safety.
                 lower)
             (let ([mid (/ (+ upper lower) 2)])
               (if (try-nth-current-pvars mid)
@@ -186,6 +186,9 @@
                        (nth-current-pvars-id (+ old-pvars-index 1)))])
         (datum->syntax
          (quote-syntax here)
-         `(define-syntaxes (,binding)
-            (list* ,@stxquoted-pvars+unique
-                   (try-nth-current-pvars ,old-pvars-index))))))))
+         `(begin
+            (define-values (,@unique-at-runtime)
+              (values ,@(map (λ (pvar) `(gensym (quote ,pvar))) pvars)))
+            (define-syntaxes (,binding)
+              (list* ,@stxquoted-pvars+unique
+                     (try-nth-current-pvars ,old-pvars-index)))))))))

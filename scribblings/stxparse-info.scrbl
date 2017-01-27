@@ -26,10 +26,10 @@ and the @racket[syntax-case] family. These patched versions track which syntax
 pattern variables are bound. This allows some libraries to change the way
 syntax pattern variables work.
 
-For example, @racketmodname[subtemplate] automatically derives temporary
+For example, @tt{subtemplate} automatically derives temporary
 identifiers when a template contains @racket[yᵢ …], and @racket[xᵢ] is a
 pattern variable. To know from which @racket[varᵢ] the @racket[yᵢ …]
-identifiers must be derived, @racketmodname[subtemplate] needs to know which
+identifiers must be derived, @tt{subtemplate} needs to know which
 syntax pattern variables are within scope.
 
 @section{Tracking currently-bound pattern variables with @racket[syntax-parse]}
@@ -86,7 +86,7 @@ track which syntax or datum pattern variables are bound.
 
  This can be used to associate run-time data with each syntax pattern
  variable, via a weak hash table created with @racket[make-weak-hasheq]. For
- example, the @racketmodname[subtemplate] library implicitly derives
+ example, the @tt{subtemplate} library implicitly derives
  identifiers (similarly to @racket[generate-temporaries]) for uses of
  @racket[yᵢ ...] from a @racket[xᵢ] pattern variable bearing the same
  subscript. The generated identifiers are associated with @racket[xᵢ] via this
