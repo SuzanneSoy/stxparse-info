@@ -6,7 +6,8 @@
              racket/private/ellipses
              stxparse-info/current-pvars
              (for-syntax racket/private/stx racket/private/small-scheme
-                         racket/private/member racket/private/sc '#%kernel))
+                         racket/private/member racket/private/sc '#%kernel
+                         auto-syntax-e/utils))
 
   (-define (datum->syntax/shape orig datum)
      (if (syntax? datum)
@@ -470,7 +471,7 @@
                                                           (list
                                                            (if s-exp?
                                                                (quote-syntax make-s-exp-mapping)
-                                                               (quote-syntax make-syntax-mapping))
+                                                               (quote-syntax make-auto-pvar))
                                                            ;; Tell it the shape of the variable:
                                                            (let loop ([var unflat-pattern-var][d 0])
                                                              (if (syntax? var)

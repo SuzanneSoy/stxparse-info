@@ -2,7 +2,8 @@
 (require (only-in "stxloc.rkt" syntax-case)
          stxparse-info/current-pvars
          (for-syntax racket/base
-                     racket/private/sc))
+                     racket/private/sc
+                     auto-syntax-e/utils))
 (provide define/with-syntax
 
          current-recorded-disappeared-uses
@@ -45,7 +46,7 @@
                     (with-syntax ([pattern rhs])
                       (values (pvar-value pvar) ...)))
                   (define-syntax pvar
-                    (make-syntax-mapping 'depth (quote-syntax valvar)))
+                    (make-auto-pvar 'depth (quote-syntax valvar)))
                   ...
                   (define-pvars pvar ...))))]))
 ;; Ryan: alternative name: define/syntax-pattern ??

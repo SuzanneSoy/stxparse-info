@@ -5,7 +5,8 @@
                      syntax/parse/private/minimatch
                      racket/private/stx ;; syntax/stx
                      racket/private/sc
-                     racket/struct)
+                     racket/struct
+                     auto-syntax-e/utils)
          stxparse-info/parse/private/residual
          "private/substitute.rkt")
 (provide template
@@ -249,7 +250,7 @@ instead of integers and integer vectors.
    (let*-values ([(drivers pre-guide props-guide) (parse-t t 0 #f)]
                  [(drivers pre-guide)
                   (if loc-id
-                      (let* ([loc-sm (make-syntax-mapping 0 loc-id)]
+                      (let* ([loc-sm (make-auto-pvar 0 loc-id)]
                              [loc-pvar (pvar loc-sm #f #f)])
                         (values (dset-add drivers loc-pvar)
                                 (relocate-guide pre-guide loc-pvar)))
@@ -474,7 +475,7 @@ instead of integers and integer vectors.
         (cond [(box? qval)
                (with-syntax ([(tmp) (generate-temporaries #'(unsyntax-expr))])
                  (set-box! qval (cons (cons #'tmp t) (unbox qval)))
-                 (let* ([fake-sm (make-syntax-mapping 0 #'tmp)]
+                 (let* ([fake-sm (make-auto-pvar 0 #'tmp)]
                         [fake-pvar (pvar fake-sm #f #f)])
                    (values (dset fake-pvar) (vector 'unsyntax fake-pvar) '_)))]
               [else
@@ -606,7 +607,7 @@ instead of integers and integer vectors.
         (cond [(box? qval)
                (with-syntax ([(tmp) (generate-temporaries #'(unsyntax-splicing-expr))])
                  (set-box! qval (cons (cons #'tmp h) (unbox qval)))
-                 (let* ([fake-sm (make-syntax-mapping 0 #'tmp)]
+                 (let* ([fake-sm (make-auto-pvar 0 #'tmp)]
                         [fake-pvar (pvar fake-sm #f #f)])
                    (values (dset fake-pvar) #t (vector 'unsyntax-splicing fake-pvar) '_)))]
               [else

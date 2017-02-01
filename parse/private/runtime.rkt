@@ -7,6 +7,7 @@
                      syntax/kerncase
                      syntax/strip-context
                      racket/private/sc
+                     auto-syntax-e/utils
                      racket/syntax
                      syntax/parse/private/rep-data))
 
@@ -101,7 +102,7 @@ residual.rkt.
                                                 'name 'depth 'syntax?)] ...)
                ([(vtmp) value] ...)
              (letrec-syntaxes+values
-                 ([(name) (make-syntax-mapping 'depth (quote-syntax stmp))] ...)
+                 ([(name) (make-auto-pvar 'depth (quote-syntax stmp))] ...)
                  ()
                (with-pvars (name ...)
                  . body)))))]))
@@ -138,7 +139,7 @@ residual.rkt.
                     (make-attribute-mapping (quote-syntax vtmp)
                                             'name 'depth 'syntax?))
                   ...
-                  (define-syntax name (make-syntax-mapping 'depth (quote-syntax stmp)))
+                  (define-syntax name (make-auto-pvar 'depth (quote-syntax stmp)))
                   ...
                   (define-pvars name ...))))]))
 
