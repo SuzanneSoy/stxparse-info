@@ -57,7 +57,7 @@ script:
  - raco setup --check-pkg-deps --pkgs stxparse-info
  - raco pkg install --deps search-auto doc-coverage
  - raco doc-coverage stxparse-info/current-pvars
- - if $RECENT; then raco pkg install --deps search-auto cover cover-codecov; fi
- - if $RECENT; then raco cover -b -f codecov -d $TRAVIS_BUILD_DIR/coverage .; fi
+ #- if $RECENT; then raco pkg install --deps search-auto cover cover-codecov; fi
+ #- if $RECENT; then raco cover -b -f codecov -d $TRAVIS_BUILD_DIR/coverage .; fi
 
 after_success:
