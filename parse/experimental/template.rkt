@@ -16,7 +16,8 @@
          define-template-metafunction
          syntax-local-template-metafunction-introduce
          ??
-         ?@)
+         ?@
+         (for-syntax template-metafunction?))
 
 #|
 To do:

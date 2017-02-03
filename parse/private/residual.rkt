@@ -53,6 +53,7 @@
 
 (require "runtime-progress.rkt"
          "3d-stx.rkt"
+         auto-syntax-e
          syntax/stx
          stxparse-info/current-pvars)
 
