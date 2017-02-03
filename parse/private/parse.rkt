@@ -417,9 +417,9 @@ Conventions:
                            [(e0 e ...)
                             ;; Should we use a shadower (works on the whole file, unhygienically),
                             ;; or use the context of the syntax-parse identifier?
-                            (let ([the-#%intef-begin (datum->syntax #'ctx '#%intef-begin)])
-                              (if (syntax-local-value the-#%intef-begin (λ () #f)) ;; Defined as a macro
-                                  #`(let () (#,the-#%intef-begin e0 e ...))
+                            (let ([the-#%intdef-begin (datum->syntax #'ctx '#%intdef-begin)])
+                              (if (syntax-local-value the-#%intdef-begin (λ () #f)) ;; Defined as a macro
+                                  #`(let () (#,the-#%intdef-begin e0 e ...))
                                   #'(let () e0 e ...)))]
                            [_ (raise-syntax-error #f "expected non-empty clause body"
                                                   #'ctx clause)]))
