@@ -1,10 +1,14 @@
 #lang scribble/manual
-@require[@for-label[stxparse-info/parse
+@require[racket/require
+         @for-label[stxparse-info/parse
+                    stxparse-info/parse/experimental/template
+                    stxparse-info/case
                     stxparse-info/current-pvars
-                    racket/syntax
-                    racket/base]
+                    (subtract-in racket/syntax stxparse-info/case)
+                    (subtract-in racket/base stxparse-info/case)]
          version-case
-         @for-syntax[racket/base]]
+         @for-syntax[racket/base]
+         "ovl.rkt"]
 
 @(version-case 
   [(version< (version) "6.4")
@@ -21,10 +25,10 @@ Source code: @url{https://github.com/jsmaniac/stxparse-info}
 
 @defmodule[stxparse-info]
 
-This library provides some patched versions of @racket[syntax-parse]
-and the @racket[syntax-case] family. These patched versions track which syntax
-pattern variables are bound. This allows some libraries to change the way
-syntax pattern variables work.
+This library provides some patched versions of @orig:syntax-parse and of the
+@orig:syntax-case family. These patched versions track which syntax pattern
+variables are bound. This allows some libraries to change the way syntax
+pattern variables work.
 
 For example, @tt{subtemplate} automatically derives temporary
 identifiers when a template contains @racket[yᵢ …], and @racket[xᵢ] is a
@@ -37,17 +41,34 @@ syntax pattern variables are within scope.
 @defmodule[stxparse-info/parse]
 
 The module @racketmodname[stxparse-info/parse] provides patched versions of
-@racketmodname[syntax/parse] @racketmodname[define/syntax-parse] which track
-which syntax pattern variables are bound.
+@orig:syntax-parse, @orig:syntax-parser and @orig:define/syntax-parse which
+track which syntax pattern variables are bound.
+
+@(ovl syntax/parse
+      syntax-parse
+      syntax-parser
+      define/syntax-parse)
 
 @section{Tracking currently-bound pattern variables with @racket[syntax-case]}
 
 @defmodule[stxparse-info/case]
 
 The module @racketmodname[stxparse-info/case] provides patched versions of
-@racket[syntax-case], @racket[syntax-case*], @racket[with-syntax],
-@racket[define/with-syntax], @racket[datum-case] and @racket[with-datum] which
+@orig:syntax-case, @orig:syntax-case*, @orig:with-syntax,
+@orig:define/with-syntax, @orig:datum-case and @orig:with-datum which
 track which syntax or datum pattern variables are bound.
+
+@(ovl racket/base
+      syntax-case
+      syntax-case*
+      with-syntax)
+
+@(ovl syntax/datum
+      datum-case
+      with-datum)
+
+@(ovl racket/syntax
+      define/with-syntax)
 
 @section{Reading and updating the list of currently-bound pattern variables}
 
@@ -117,7 +138,7 @@ track which syntax or datum pattern variables are bound.
      (with-pvars (x)
        (get-current-pvars+unique)) (code:comment "'([x . g123])")
      (with-pvars (x)
-                 (get-current-pvars+unique)))) (code:comment "'([x . g124])")]
+       (get-current-pvars+unique)))) (code:comment "'([x . g124])")]
 
  Under normal circumstances, @racket[with-pvars] @racket[define-pvars] should
  be called immediately after binding the syntax pattern variable, but the code
@@ -152,15 +173,15 @@ track which syntax or datum pattern variables are bound.
  (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
               [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
    (with-pvars (v₁ v₂)
-               code))]
+     code))]
 
  instead of:
 
  @racketblock[
  (with-pvars (v₁ v₂)
-             (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
-                          [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
-               code))]}
+   (let-syntax ([v₁ (make-syntax-mapping depth (quote-syntax valvar))]
+                [v₂ (make-syntax-mapping depth (quote-syntax valvar))])
+     code))]}
 
 @defform[(define-pvars pvar ...)
          #:contracts ([pvar identifier?])]{
@@ -215,10 +236,18 @@ track which syntax or datum pattern variables are bound.
 
 @defmodule[stxparse-info/parse/experimental/template]
 
-@defform[(syntax-local-template-introduce stx)]{
- Like @racket[syntax-local-introduce], but for @tech{template metafunctions}.
+@defform[(syntax-local-template-metafunction-introduce stx)]{
+ Like @racket[syntax-local-introduce], but for
+ @tech[#:doc '(lib "syntax/scribblings/syntax.scrbl")]{template metafunctions}.
 
  This change is also available in the package
  @racketmodname{backport-template-pr1514}. It has been submitted as a Pull
  Request to Racket, but can be used in
  @racketmodname[stxparse-info/parse/experimental/template] right away.}
+
+@(ovl syntax/parse/experimental/template
+      template
+      quasitemplate
+      template/loc
+      quasitemplate/loc
+      define-template-metafunction)

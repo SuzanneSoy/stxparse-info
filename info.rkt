@@ -6,7 +6,9 @@
                "version-case"
                "subtemplate" ;; for the documentation only
                "auto-syntax-e"))
-(define build-deps '("scribble-lib" "racket-doc"))
+(define build-deps '("scribble-lib"
+                     "racket-doc"
+                     "at-exp-lib")) ;; for the documentation only
 (define scribblings '(("scribblings/stxparse-info.scrbl" ())))
 (define pkg-desc "Description Here")
 (define version "0.0")
