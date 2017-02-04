@@ -236,18 +236,31 @@ track which syntax or datum pattern variables are bound.
 
 @defmodule[stxparse-info/parse/experimental/template]
 
+@defidform[define-template-metafunction]{
+ Overloaded version of @orig:define-template-metafunction from
+ @racketmodname[syntax/parse/experimental/template].
+
+ Note that currently, template metafunctions defined via
+ @racketmodname[stxparse-info/parse/experimental/template] are not compatible
+ with the forms from @racketmodname[syntax/parse/experimental/template], and
+ vice versa. There is a pending Pull Request which would make the necessary
+ primitives from @racketmodname[syntax/parse/experimental/template] public, so
+ hopefully this problem will be solved in future versions.}
+
 @defform[(syntax-local-template-metafunction-introduce stx)]{
  Like @racket[syntax-local-introduce], but for
  @tech[#:doc '(lib "syntax/scribblings/syntax.scrbl")]{template metafunctions}.
 
  This change is also available in the package
  @racketmodname{backport-template-pr1514}. It has been submitted as a Pull
- Request to Racket, but can be used in
- @racketmodname[stxparse-info/parse/experimental/template] right away.}
+ Request to Racket, but can already be used in
+ @racketmodname[stxparse-info/parse/experimental/template] right now.}
 
 @(ovl syntax/parse/experimental/template
       template
       quasitemplate
       template/loc
-      quasitemplate/loc
-      define-template-metafunction)
+      quasitemplate/loc)
+
+@(orig syntax/parse/experimental/template
+       define-template-metafunction)
