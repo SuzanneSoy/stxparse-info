@@ -55,11 +55,19 @@
                                #'(name ...))])
          #'(list
             @defidform[stripped-name]{
-                                      Overloaded version of @|prefixed| from
-                                                 @racketmodname[mod].}
+        Overloaded version of @|prefixed| from
+        @racketmodname[mod].}
             ...))]))
 
-  (define-syntax-rule (ovl mod name ...)
-    (begin
-      (orig mod name ...)
-      (ovl* mod name ...))))
+  (define-syntax (ovl stx)
+    (syntax-case stx ()
+      [(self mod name ...)
+       (identifier? #'mod)
+       #'(self #:wrapper list mod name ...)]
+      [(self #:wrapper wrapper mod name ...)
+       (identifier? #'mod)
+       #'(self #:wrapper wrapper #:require mod mod name ...)]
+      [(_ #:wrapper wrapper #:require req mod name ...)
+       #'(begin
+           (orig req name ...)
+           (wrapper (ovl* mod name ...)))])))

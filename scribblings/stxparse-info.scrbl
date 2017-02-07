@@ -10,6 +10,12 @@
          @for-syntax[racket/base]
          "ovl.rkt"]
 
+@; Circumvent https://github.com/racket/scribble/issues/79
+@(require scribble/struct
+          scribble/decode)
+@(define (nested-inset . vs)
+   (nested #:style 'inset vs))
+
 @(version-case 
   [(version< (version) "6.4")
    ]
@@ -48,6 +54,69 @@ track which syntax pattern variables are bound.
       syntax-parse
       syntax-parser
       define/syntax-parse)
+
+Additionally, the following identifiers are overridden as they are part of the
+duplicated implementation of @racketmodname[syntax/parse].
+
+@(ovl #:wrapper nested-inset
+      syntax/parse
+      ...+
+      attribute
+      boolean
+      char
+      character
+      define-conventions
+      define-eh-alternative-set
+      define-literal-set
+      define-splicing-syntax-class
+      define-syntax-class
+      exact-integer
+      exact-nonnegative-integer
+      exact-positive-integer
+      expr
+      expr/c
+      id
+      identifier
+      integer
+      kernel-literals
+      keyword
+      literal-set->predicate
+      nat
+      number
+      pattern
+      static
+      str
+      this-syntax
+      ~!
+      ~and
+      ~between
+      ~bind
+      ~commit
+      ~datum
+      ~delimit-cut
+      ~describe
+      ~do
+      ~fail
+      ~literal
+      ~not
+      ~once
+      ~optional
+      ~or
+      ~parse
+      ~peek
+      ~peek-not
+      ~post
+      ~rest
+      ~seq
+      ~var)
+
+@(ovl #:wrapper nested-inset
+      #:require (for-template syntax/parse)
+      syntax/parse
+      pattern-expander?
+      pattern-expander
+      prop:pattern-expander
+      syntax-local-syntax-parse-pattern-introduce)
 
 @section{Tracking currently-bound pattern variables with @racket[syntax-case]}
 
@@ -236,6 +305,9 @@ track which syntax or datum pattern variables are bound.
 
 @defmodule[stxparse-info/parse/experimental/template]
 
+@(orig syntax/parse/experimental/template
+       define-template-metafunction)
+
 @defidform[define-template-metafunction]{
  Overloaded version of @orig:define-template-metafunction from
  @racketmodname[syntax/parse/experimental/template].
@@ -262,5 +334,10 @@ track which syntax or datum pattern variables are bound.
       template/loc
       quasitemplate/loc)
 
-@(orig syntax/parse/experimental/template
-       define-template-metafunction)
+Additionally, the following identifiers are overridden as they are part of the
+duplicated implementation of @racketmodname[syntax/parse].
+
+@(ovl #:wrapper nested-inset
+      syntax/parse/experimental/template
+      ??
+      ?@)

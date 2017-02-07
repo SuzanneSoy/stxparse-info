@@ -56,7 +56,8 @@ script:
  - raco test -p stxparse-info
  - raco setup --check-pkg-deps --pkgs stxparse-info
  - raco pkg install --deps search-auto doc-coverage
- - raco doc-coverage stxparse-info/current-pvars
+ - raco doc-coverage stxparse-info/current-pvars stxparse-info/parse stxparse-info/case
+ # TODO: should also run doc-coverage on stxparse-info itself, but it refuses to see the docs for pattern-expander? pattern-expander pattern-expander? pattern-expander?.
  #- if $RECENT; then raco pkg install --deps search-auto cover cover-codecov; fi
  #- if $RECENT; then raco cover -b -f codecov -d $TRAVIS_BUILD_DIR/coverage .; fi
 
