@@ -171,7 +171,7 @@
                     (syntax*->list (stx-cdr stx))
                     (andmap identifier?
                             (syntax*->list (stx-cdr stx)))))
-          (raise-syntax-error 'with-pvars "bad syntax" stx)
+          (raise-syntax-error 'define-pvars "bad syntax" stx)
           (void))
       (let* ([pvars (reverse (syntax*->list (stx-cdr stx)))]
              [unique-at-runtime (map gensym (map syntax-e pvars))]
