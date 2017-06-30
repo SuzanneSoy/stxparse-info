@@ -110,6 +110,14 @@ duplicated implementation of @racketmodname[syntax/parse].
       ~seq
       ~var)
 
+@(version-case
+  [(version>= (version) "6.9.0.6")
+   (ovl #:wrapper nested-inset
+        syntax/parse
+        ~alt
+        ~or*)]
+  [else (begin)])
+
 @(ovl #:wrapper nested-inset
       #:require (for-template syntax/parse)
       syntax/parse
