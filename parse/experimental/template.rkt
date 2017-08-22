@@ -13,6 +13,7 @@
          racket/private/promise)
 (provide template
          template/loc
+         datum-template
          quasitemplate
          quasitemplate/loc
          define-template-metafunction
@@ -127,8 +128,8 @@
  ;; ----------------------------------------
  ;; Parsing templates
 
- ;; parse-template : Syntax -> (values (listof PVar) Guide)
- (define (parse-template t)
+ ;; parse-template : Syntax Boolean -> (values (listof PVar) Guide)
+ (define (parse-template t stx?)
    ;; env : Hasheq[ (cons syntax-mapping Nat) => PVar ]
    (define env (make-hasheq))
 
@@ -153,10 +154,11 @@
         (let-values ([(drivers1 guide1) (parse-t #'t1 depth esc? #t)]
                      [(drivers2 guide2) (parse-t #'t2 depth esc? in-try?)])
           (values (dset-union drivers1 drivers2) `(t-orelse ,guide1 ,guide2)))]
-       [(mf . _)
-        (and (not esc?) (lookup-metafun #'mf))
-        (let-values ([(mf) (lookup-metafun #'mf)]
+       [(mf-id . _)
+        (and (not esc?) (lookup-metafun #'mf-id))
+        (let-values ([(mf) (lookup-metafun #'mf-id)]
                      [(drivers guide) (parse-t (stx-cdr t) depth esc? in-try?)])
+          (unless stx? (wrong-syntax "metafunctions not supported" #'mf-id))
           (values drivers `(t-metafun ,(template-metafunction-var mf) ,guide)))]
        [_ (parse-t-pair/dots t depth esc? in-try?)]))
 
@@ -270,7 +272,8 @@
 
    ;; lookup : Identifier Nat -> PVar/#f
    (define (lookup id depth)
-     (let ([v (syntax-local-value/record id syntax-pattern-variable?)])
+     (define variable? (if stx? syntax-pattern-variable? s-exp-pattern-variable?))
+     (let ([v (syntax-local-value/record id variable?)])
        (cond [(syntax-pattern-variable? v)
               (hash-ref! env (cons v depth)
                 (lambda ()
@@ -287,6 +290,19 @@
                          (pvar var lvar check? (- depth pvar-depth))]
                         [else
                          (wrong-syntax id "missing ellipses with pattern variable in template")])))]
+             [(s-exp-pattern-variable? v)
+              (hash-ref! env (cons v depth)
+                (lambda ()
+                  (define pvar-depth (s-exp-mapping-depth v))
+                  (define var (s-exp-mapping-valvar v))
+                  (define check? #f)
+                  (cond [(zero? pvar-depth)
+                         (pvar var var #f #f)]
+                        [(>= depth pvar-depth)
+                         (define lvar (car (generate-temporaries #'(pv_))))
+                         (pvar var lvar #f (- depth pvar-depth))]
+                        [else
+                         (wrong-syntax id "missing ellipses with pattern variable in template")])))]
              [else
               ;; id is a literal; check that for all x s.t. id = x.y, x is not an attribute
               (for ([pfx (in-list (dotted-prefixes id))])
@@ -298,7 +314,7 @@
               #f])))
 
    ;; resyntax : Stx Guide -> Guide
-   (define (resyntax t g) (if (syntax? t) `(t-resyntax ,g) g))
+   (define (resyntax t g) (if (and stx? (syntax? t)) `(t-resyntax ,g) g))
 
    (let-values ([(drivers guide) (parse-t t 0 #f #f)])
      (values (dset->list drivers) guide)))
@@ -364,26 +380,27 @@
 
  ;; ----------------------------------------
 
- ;; do-template : Syntax Syntax Id/#f -> Syntax
- (define (do-template ctx tstx loc-id)
+ ;; do-template : Syntax Syntax Id/#f Boolean -> Syntax
+ (define (do-template ctx tstx loc-id stx?)
    (with-disappeared-uses
      (parameterize ((current-syntax-context ctx))
-       (define-values (pvars pre-guide) (parse-template tstx))
+       (define-values (pvars pre-guide) (parse-template tstx stx?))
        (define guide (if loc-id (relocate-guide pre-guide loc-id) pre-guide))
        (syntax-arm
         (with-syntax ([t tstx]
+                      [quote-template (if stx? #'quote-syntax #'quote)]
                       [((var . pvar-val-var) ...)
                        (for/list ([pvar (in-list pvars)] #:when (pvar-dd pvar))
                          (cons (pvar-lvar pvar) (pvar-var pvar)))])
           #`(let ([var pvar-val-var] ...)
-              (let ([tstx0 (quote-syntax t)])
+              (let ([tstx0 (quote-template t)])
                 (#,(compile-guide guide) tstx0))))))))
  )
 
 (define-syntax (template stx)
   (syntax-case stx ()
     [(template t)
-     (do-template stx #'t #f)]
+     (do-template stx #'t #f #t)]
     [(template t #:properties _)
      (begin
        (log-template-error "template #:properties argument no longer supported: ~e" stx)
@@ -393,9 +410,15 @@
   (syntax-case stx ()
     [(template/loc loc-expr t)
      (syntax-arm
-      (with-syntax ([main-expr (do-template stx #'t #'loc-var)])
+      (with-syntax ([main-expr (do-template stx #'t #'loc-var #t)])
         #'(let ([loc-var (handle-loc '?/loc loc-expr)])
             main-expr)))]))
+
+
+(define-syntax (datum-template stx)
+  (syntax-case stx ()
+    [(datum-template t)
+     (do-template stx #'t #f #f)]))
 
 (define (handle-loc who x)
   (if (syntax? x) x (raise-argument-error who "syntax?" x)))
