@@ -17,7 +17,7 @@
          racket/stxparam
          syntax/stx
          stxparse-info/parse/private/residual ;; keep abs. path
-         stxparse-info/parse/private/runtime  ;; keep abs.path 
+         "runtime.rkt"
          stxparse-info/parse/private/runtime-reflect) ;; keep abs. path
 
 ;; ============================================================
