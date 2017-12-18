@@ -23,8 +23,7 @@
    (require scribble/example)
    (define ev ((make-eval-factory '(racket))))])
 
-@title{stxparse-info : Tracking bound syntax pattern variables with
- @racket[syntax-parse] and @racket[syntax-case]}
+@title{stxparse-info : Tracking bound syntax pattern variables}
 @author[@author+email["Georges Dupéron" "georges.duperon@gmail.com"]]
 
 Source code: @url{https://github.com/jsmaniac/stxparse-info}
