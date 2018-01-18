@@ -85,6 +85,10 @@ duplicated implementation of @racketmodname[syntax/parse].
       pattern
       static
       str
+      syntax-parse-state-cons!
+      syntax-parse-state-ref
+      syntax-parse-state-set!
+      syntax-parse-state-update! 
       this-syntax
       ~!
       ~and
@@ -107,6 +111,7 @@ duplicated implementation of @racketmodname[syntax/parse].
       ~post
       ~rest
       ~seq
+      ~undo
       ~var)
 
 @(version-case
