@@ -31,7 +31,7 @@ env:
     ###- RACKET_VERSION=6.5   RECENT=true
     ###- RACKET_VERSION=6.6   RECENT=true
     ###- RACKET_VERSION=6.7   RECENT=true
-    - RACKET_VERSION=6.8   RECENT=true
+    #- RACKET_VERSION=6.12   RECENT=true
     - RACKET_VERSION=HEAD  RECENT=true
 
 matrix:
