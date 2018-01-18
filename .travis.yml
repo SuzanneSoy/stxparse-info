@@ -32,7 +32,10 @@ env:
     ###- RACKET_VERSION=6.6   RECENT=true
     ###- RACKET_VERSION=6.7   RECENT=true
     - RACKET_VERSION=6.8   RECENT=true
-    - RACKET_VERSION=HEAD  RECENT=true
+    - RACKET_VERSION=6.9   RECENT=true
+    - RACKET_VERSION=6.10   RECENT=true
+    - RACKET_VERSION=6.11   RECENT=true
+    #- RACKET_VERSION=HEAD  RECENT=true
 
 matrix:
   allow_failures:
