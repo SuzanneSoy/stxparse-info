@@ -1,5 +1,5 @@
 #lang racket
-(require stxparse-info/parse
+(require ;stxparse-info/parse
          stxparse-info/case
          stxparse-info/current-pvars
          racket/stxparam
@@ -32,15 +32,21 @@
 ;; First check that (current-pvars) returns the empty list before anything
 ;; is done:
 
-(check-equal? (list-pvars)
-              '())
+#;(check-equal? (list-pvars)
+                '())
+
+#;(syntax-case #'() ()
+    [() (syntax-case #'(1 2 3 a b c) ()
+          [(x y ...)
+           (list-pvars)])])
 
 ;; Simple case:
-(check-equal? (syntax-parse #'(1 2 3 a b c)
-                [(x y ...)
-                 (list-pvars)])
-              '(y x))
-
+#;(check-equal? (syntax-case #'() ()
+                  [() (syntax-parse #'(1 2 3 a b c)
+                        [(x y ...)
+                         (list-pvars)])])
+                '(y x))
+#|
 ;; Mixed definitions from user code and from a macro
 (begin
   (define-syntax (mixed stx)
@@ -134,6 +140,15 @@
 (define-syntax-rule (gen-test-define define/xxx)
   (...
    (begin
+     ;; Check that "z" is known both before and after its definition
+     (check-equal? (syntax-parse #'1
+                     [_
+                      (let ()
+                        (define lpv1 (list-pvars))
+                        (define/xxx z #'3)
+                        (define lpv2 (list-pvars))
+                        (list lpv1 lpv2))])
+                   '((z) (z)))
      (check-equal? (syntax-parse #'1
                      [_
                       (list (list-pvars)
@@ -574,4 +589,4 @@
 (check-equal? (expected-defs3 a b c d e)
               '(() (a) (a b) (a b c) (a b c d) (a b c d e)))
 
-(check-defs3* 6 65) ;; continue tests with 6 till 65 pvars
+(check-defs3* 6 65) ;; continue tests with 6 till 65 pvars|#

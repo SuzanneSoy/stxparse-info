@@ -6,14 +6,155 @@
   
   (#%require racket/private/small-scheme
              (for-syntax '#%kernel
+                         '#%paramz
                          racket/private/qq-and-or
                          racket/private/stx))
+  
+  (begin-for-syntax
+    (define-values (current-pvars-param-guard)
+      (lambda (x)
+        ;; TODO: add condition: elements should be pairs of identifiers?
+        (if (list? x)
+            x
+            (error "current-pvars-param should be a list"))))
+    
+    (define-values (current-pvars-param)
+      (make-parameter '() current-pvars-param-guard))
 
+    (define-values (current-pvars)
+      (lambda () (map car (current-pvars-param))))
+    
+    (define-values (current-pvars+unique)
+      (lambda () (map car (current-pvars-param))))
+
+    (define-values (syntax*->list)
+      (λ (stxlist)
+        (syntax->list (datum->syntax #f stxlist)))))
+
+  (begin-for-syntax
+    (define-values (with-pvars2)
+      (lambda (stx)
+        (let* ([pvars (reverse (syntax*->list (stx-car (stx-cdr stx))))]
+               [_1 (display 1)]
+               [unique-at-runtime (map gensym (map syntax-e pvars))]
+               [_2 (display 2)]
+               #;[stxquoted-pvars+unique (map (λ (v unique)
+                                              `(cons (quote-syntax ,v)
+                                                     (quote-syntax ,unique)))
+                                            pvars
+                                            unique-at-runtime)]
+               [pvars+unique (map cons pvars unique-at-runtime)]
+               [_3 (display 3)]
+               [body (stx-cdr (stx-cdr stx))]
+               [_4 (display 4)]
+               #;[old-pvars-index (find-last-current-pvars)]
+               #;[old-pvars (try-nth-current-pvars old-pvars-index)]
+               #;[binding (syntax-local-identifier-as-binding
+                           (nth-current-pvars-id (+ old-pvars-index 1)))]
+               #;[lower-bound-binding
+                  (syntax-local-identifier-as-binding
+                   (syntax-local-introduce
+                    (quote-syntax current-pvars-index-lower-bound)))]
+               [_5 (display 5)]
+               [do-unique-at-runtime (map (λ (id pvar)
+                                            `[(,id) (gensym (quote ,pvar))])
+                                          unique-at-runtime
+                                          pvars)]
+               [_6 (display 6)]
+               [wrapped-body (datum->syntax
+                              (quote-syntax here)
+                              `(let-values (,@do-unique-at-runtime)
+                                 ,@body))])
+
+          (display 7)
+          (with-continuation-mark
+              parameterization-key
+            (extend-parameterization
+             (continuation-mark-set-first #f parameterization-key)
+             current-pvars-param
+             (append pvars+unique
+                     (current-pvars-param)))
+            (let-values ([(_8) (display 8)]
+                         [(stx opaque)
+                          (syntax-local-expand-expression wrapped-body #t)])
+              (display 9)
+              opaque))
+        
+          #;(datum->syntax
+             (quote-syntax here)
+             `(with-continuation-mark
+                  parameterization-key
+                (extend-parameterization
+                 (continuation-mark-set-first #f parameterization-key)
+                 current-pvars-param
+                 (append pvars+unique
+                         (current-pvars-param)))
+                (let ()
+                  syntax-local-expand-expression)))
+        
+          ;; above is the expansion of:
+          #;(parameterize ([current-pvars-param
+                            (list* stxquoted-pvars+unique
+                                   (current-pvars-param))])
+              syntax-local-expand-expression)
+
+          #;(datum->syntax
+             (quote-syntax here)
+             `(let-values (,@do-unique-at-runtime)
+                (letrec-syntaxes+values
+                    (#;[(,binding) (list* ,@stxquoted-pvars+unique
+                                          (try-nth-current-pvars ,old-pvars-index))]
+                     #;[(,lower-bound-binding) ,(+ old-pvars-index 1)])
+                  ()
+                  . ,body)))))))
+
+  ;; (with-pvars [pvar ...] . body)
+  (define-syntaxes (with-pvars)
+    (lambda (stx)
+      (if (not (and (stx-pair? stx)
+                    (identifier? (stx-car stx))
+                    (stx-pair? (stx-cdr stx))
+                    (syntax*->list (stx-car (stx-cdr stx)))
+                    (andmap identifier?
+                            (syntax*->list (stx-car (stx-cdr stx))))))
+          (raise-syntax-error 'with-pvars "bad syntax" stx)
+          (void))
+      (with-pvars2 stx)))
+
+  (define-syntaxes (define-pvars)
+    (lambda (stx)
+      (if (not (and (stx-pair? stx)
+                    (identifier? (stx-car stx))
+                    (syntax*->list (stx-cdr stx))
+                    (andmap identifier?
+                            (syntax*->list (stx-cdr stx)))))
+          (raise-syntax-error 'define-pvars "bad syntax" stx)
+          (void))
+      (let* ([pvars (reverse (syntax*->list (stx-cdr stx)))]
+             [unique-at-runtime (map gensym (map syntax-e pvars))]
+             [stxquoted-pvars+unique (map (λ (v unique)
+                                            `(cons (quote-syntax ,v)
+                                                   (quote-syntax ,unique)))
+                                          pvars
+                                          unique-at-runtime)])
+        (datum->syntax
+         (quote-syntax here)
+         `(begin
+            (define-values (,@unique-at-runtime)
+              (values ,@(map (λ (pvar) `(gensym (quote ,pvar))) pvars)))
+            (define-syntaxes ()
+              (begin
+                (current-pvars-param
+                 (list* ,@stxquoted-pvars+unique
+                        (current-pvars-param)))
+                (values))))))))
+
+  #|
   ;; This is a poor man's syntax parameter. Since the implementation of
   ;; racket/stxparam depends on syntax-case, and we want to add current-pvars to
   ;; syntax-case, we cannot use syntax parameters, lest we create a cyclic
   ;; dependency. Instead, we implement here a simplified "syntax parameter".
-  ;  Like racket/stxparam, it relies on nested bindings of the same identifier,
+  ;; Like racket/stxparam, it relies on nested bindings of the same identifier,
   ;; and on syntax-local-get-shadower to access the most nested binding.
 
   ;; Since define/with-syntax and define/syntax-parse need to add new ids to
@@ -50,8 +191,9 @@
     (define-values (try-current-pvars)
       (λ (id)
         (syntax-local-value
-         (syntax-local-get-shadower id
-                                    #t)
+         id
+         #;(syntax-local-get-shadower id
+                                      #t)
          ;; Default value if we are outside of any with-pvars.
          (λ () #f))))
 
@@ -66,6 +208,8 @@
     ;; (-> exact-nonnegative-integer? (or/c #f (listof identifier?)))
     (define-values (try-nth-current-pvars)
       (λ (n)
+        (display n)
+        (newline)
         (try-current-pvars (nth-current-pvars-id n))))
 
     ;; (-> exact-nonnegative-integer? exact-nonnegative-integer?
@@ -99,10 +243,12 @@
     (define-values (find-last-current-pvars)
       (λ ()
         (let ([lower-bound (syntax-local-value
-                            (syntax-local-get-shadower
-                             (syntax-local-introduce
+                            (syntax-local-introduce
                               (quote-syntax current-pvars-index-lower-bound))
-                             #t))])
+                            #;(syntax-local-get-shadower
+                               (syntax-local-introduce
+                                (quote-syntax current-pvars-index-lower-bound))
+                               #t))])
           (if (not (try-nth-current-pvars (+ lower-bound 1)))
               ;; Short path for the common case where there are no uses
               ;; of define/with-syntax or define/syntax-parse in the most nested
@@ -144,12 +290,14 @@
              [body (stx-cdr (stx-cdr stx))]
              [old-pvars-index (find-last-current-pvars)]
              [old-pvars (try-nth-current-pvars old-pvars-index)]
+             [__ (display old-pvars-index)]
+             [___ (newline)]
              [binding (syntax-local-identifier-as-binding
                        (nth-current-pvars-id (+ old-pvars-index 1)))]
-             [lower-bound-binding
-              (syntax-local-identifier-as-binding
-               (syntax-local-introduce
-                (quote-syntax current-pvars-index-lower-bound)))]
+             #;[lower-bound-binding
+                (syntax-local-identifier-as-binding
+                 (syntax-local-introduce
+                  (quote-syntax current-pvars-index-lower-bound)))]
              [do-unique-at-runtime (map (λ (id pvar)
                                           `[(,id) (gensym (quote ,pvar))])
                                         unique-at-runtime
@@ -160,7 +308,7 @@
             (letrec-syntaxes+values
                 ([(,binding) (list* ,@stxquoted-pvars+unique
                                     (try-nth-current-pvars ,old-pvars-index))]
-                 [(,lower-bound-binding) ,(+ old-pvars-index 1)])
+                 #;[(,lower-bound-binding) ,(+ old-pvars-index 1)])
               ()
               . ,body))))))
 
@@ -191,4 +339,5 @@
               (values ,@(map (λ (pvar) `(gensym (quote ,pvar))) pvars)))
             (define-syntaxes (,binding)
               (list* ,@stxquoted-pvars+unique
-                     (try-nth-current-pvars ,old-pvars-index)))))))))
+                     (try-nth-current-pvars ,old-pvars-index))))))))
+|#)
