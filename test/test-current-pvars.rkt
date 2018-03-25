@@ -28,17 +28,59 @@
                            (list-ref (current-pvars) (syntax-e #'n)))])
              (datum->syntax pvar (syntax-e pvar) stx))]))
 
-
 ;; First check that (current-pvars) returns the empty list before anything
 ;; is done:
 
 (check-equal? (list-pvars)
               '())
 
+(let ()
+  (define/with-syntax x #'1)
+  (void))
+
+(check-equal? (list-pvars)
+              '())
+
+;; test that the x is correctly removed, even if no querry was made
+;; between its creation and the creation of the y.
+(let () (define/with-syntax x #'1) (void))
+(let ()
+  (define/with-syntax y #'2)
+  (check-equal? (list-pvars)
+                '(y))
+  (void))
+
+(check-equal? (list (list-pvars)
+                    (syntax-case #'() ()
+                      [() (list (list-pvars)
+                                (syntax-case #'(1 2 3 a b c) ()
+                                  [(x y ...)
+                                   (list-pvars)])
+                                (list-pvars))])
+                    (list-pvars))
+              '(() (() (y x) ()) ()))
+
+(check-equal? (list (list-pvars)
+                    (syntax-case #'(-1 -2) ()
+                      [(k l) (list (list-pvars)
+                                   (syntax-case #'(1 2 3 a b c) ()
+                                     [(z t ...)
+                                      (list-pvars)])
+                                   (list-pvars))])
+                    (list-pvars))
+              '(() ((l k) (t z l k) (l k)) ()))
+
 ;; Simple case:
 (check-equal? (syntax-parse #'(1 2 3 a b c)
                 [(x y ...)
                  (list-pvars)])
+              '(y x))
+
+;; Simple case:
+(check-equal? (syntax-case #'() ()
+                [() (syntax-parse #'(1 2 3 a b c)
+                      [(x y ...)
+                       (list-pvars)])])
               '(y x))
 
 ;; Mixed definitions from user code and from a macro
@@ -63,6 +105,9 @@
                                     (syntax->datum (ref-nth-pvar 2))
                                     (syntax->datum (ref-nth-pvar 3)))))
                 '(4 3 2 1)))
+
+(check-equal? (list-pvars)
+              '())
 
 ;; Tests for syntax-parse
 (begin
@@ -369,6 +414,16 @@
               [_
                #false]))
 
+(let ()
+  (define/with-syntax (x ... y) #'(1 2 3))
+  (check-true (match (list-pvars+unique-val)
+                [(list (cons 'y (? symbol?))
+                       (cons 'x (? symbol?)))
+                 #true]
+                [v
+                 (displayln v)
+                 #false])))
+
 (check-true (match (syntax-case #'(1 2 3) ()
                      [(x ... y)
                       (list-pvars+unique-val)])
@@ -575,3 +630,6 @@
               '(() (a) (a b) (a b c) (a b c d) (a b c d e)))
 
 (check-defs3* 6 65) ;; continue tests with 6 till 65 pvars
+
+(check-equal? (list-pvars)
+              '())
