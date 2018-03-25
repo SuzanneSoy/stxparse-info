@@ -5,7 +5,8 @@
                ;; Because scribble/example is not available on v6.3:
                "version-case"
                "subtemplate" ;; for the documentation only
-               "auto-syntax-e"))
+               "auto-syntax-e"
+               "compatibility-lib"))
 (define build-deps '("scribble-lib"
                      "racket-doc"
                      "at-exp-lib")) ;; for the documentation only
