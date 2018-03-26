@@ -12,7 +12,6 @@
          (tmp))]))
 
 (define-for-syntax (my-include2 dirname filename)
-  (displayln (list dirname filename))
   (let ([filename (build-path dirname
                               filename)])
     (define s
