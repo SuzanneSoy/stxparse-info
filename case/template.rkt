@@ -5,8 +5,8 @@
            stxparse-info/my-include)
 (version-case
   [(version< (version) "6.11.0.900")
-    (my-include "stxcase-scheme.rkt-6-11")]
+    (begin)]
   [(version< (version) "6.90.0.29")
-    (my-include "stxcase-scheme.rkt-6-11")]
+    (begin)]
   [else
-    (my-include "stxcase-scheme.rkt-6-90-0-29")])
+    (my-include "template.rkt-6-90-0-29")])

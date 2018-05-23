@@ -6,5 +6,7 @@
 (version-case
   [(version< (version) "6.11.0.900")
     (my-include "substitute.rkt-6-11")]
+  [(version< (version) "6.90.0.29")
+    (begin)]
   [else
     (begin)])
