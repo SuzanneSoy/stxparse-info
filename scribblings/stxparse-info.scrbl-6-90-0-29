@@ -89,6 +89,7 @@ duplicated implementation of @racketmodname[syntax/parse].
       syntax-parse-state-ref
       syntax-parse-state-set!
       syntax-parse-state-update! 
+      syntax-parse-track-literals
       this-syntax
       ~!
       ~and
