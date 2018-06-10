@@ -5,7 +5,7 @@
   (#%require racket/private/stx racket/private/small-scheme "stxcase.rkt"
              (for-syntax '#%kernel racket/private/stx "stxcase.rkt"
                          (all-except racket/private/stxloc syntax/loc) racket/private/sc
-                         racket/private/qq-and-or racket/private/cond))
+                         racket/private/gen-temp racket/private/qq-and-or racket/private/cond))
 
   (-define (with-syntax-fail stx)
     (raise-syntax-error

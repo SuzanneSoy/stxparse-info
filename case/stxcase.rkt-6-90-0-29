@@ -6,7 +6,7 @@
              racket/private/ellipses
              stxparse-info/current-pvars
              (for-syntax racket/private/stx racket/private/small-scheme
-                         racket/private/member racket/private/sc '#%kernel
+                         racket/private/gen-temp racket/private/member racket/private/sc '#%kernel
                          auto-syntax-e/utils))
 
   (-define interp-match
