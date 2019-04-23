@@ -8,5 +8,7 @@
     (my-include "lib.rkt-6-11")]
   [(version< (version) "6.90.0.29")
     (my-include "lib.rkt-6-12")]
+  [(version< (version) "7.0.0.20")
+    (my-include "lib.rkt-6-90-0-29")]
   [else
-    (my-include "lib.rkt-6-90-0-29")])
+    (my-include "lib.rkt-7-3-0-1")])

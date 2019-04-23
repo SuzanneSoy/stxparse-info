@@ -10,5 +10,7 @@
     (my-include "debug.rkt-6-12")]
   [(version< (version) "7.0.0.20")
     (my-include "debug.rkt-6-90-0-29")]
+  [(version< (version) "7.3.0.1")
+    (my-include "debug.rkt-7-0-0-20")]
   [else
-    (my-include "debug.rkt-7-0-0-20")])
+    (my-include "debug.rkt-7-3-0-1")])
