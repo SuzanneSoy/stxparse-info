@@ -24,7 +24,7 @@
    (define ev ((make-eval-factory '(racket))))])
 
 @title{@racketmodname[stxparse-info]: Track @racket[syntax-parse] and @racket[syntax-case] pattern vars}
-@author[@author+email["Georges Dupéron" "georges.duperon@gmail.com"]]
+@author[@author+email["Suzanne Soy" "racket@suzanne.soy"]]
 
 Source code: @url{https://github.com/jsmaniac/stxparse-info}
 
