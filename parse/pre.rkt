@@ -5,10 +5,10 @@
            stxparse-info/my-include)
 (version-case
   [(version< (version) "6.11.0.900")
-    (my-include "pre.rkt-6-11")]
+    (my-include "../6-11/stxparse-info/parse/pre.rkt")]
   [(version< (version) "6.90.0.29")
-    (my-include "pre.rkt-6-12")]
+    (my-include "../6-12/stxparse-info/parse/pre.rkt")]
   [(version< (version) "7.0.0.20")
-    (my-include "pre.rkt-6-90-0-29")]
+    (my-include "../6-90-0-29/stxparse-info/parse/pre.rkt")]
   [else
-    (my-include "pre.rkt-7-0-0-20")])
+    (my-include "../7-0-0-20/stxparse-info/parse/pre.rkt")])

@@ -5,12 +5,12 @@
            stxparse-info/my-include)
 (version-case
   [(version< (version) "6.11.0.900")
-    (my-include "debug.rkt-6-11")]
+    (my-include "../6-11/stxparse-info/parse/debug.rkt")]
   [(version< (version) "6.90.0.29")
-    (my-include "debug.rkt-6-12")]
+    (my-include "../6-12/stxparse-info/parse/debug.rkt")]
   [(version< (version) "7.0.0.20")
-    (my-include "debug.rkt-6-90-0-29")]
+    (my-include "../6-90-0-29/stxparse-info/parse/debug.rkt")]
   [(version< (version) "7.3.0.1")
-    (my-include "debug.rkt-7-0-0-20")]
+    (my-include "../7-0-0-20/stxparse-info/parse/debug.rkt")]
   [else
-    (my-include "debug.rkt-7-3-0-1")])
+    (my-include "../7-3-0-1/stxparse-info/parse/debug.rkt")])

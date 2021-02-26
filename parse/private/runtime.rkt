@@ -5,8 +5,8 @@
            stxparse-info/my-include)
 (version-case
   [(version< (version) "6.11.0.900")
-    (my-include "runtime.rkt-6-11")]
+    (my-include "../../6-11/racket/collects/syntax/parse/private/runtime.rkt")]
   [(version< (version) "6.90.0.29")
-    (my-include "runtime.rkt-6-12")]
+    (my-include "../../6-12/racket/collects/syntax/parse/private/runtime.rkt")]
   [else
-    (my-include "runtime.rkt-6-90-0-29")])
+    (my-include "../../6-90-0-29/racket/collects/syntax/parse/private/runtime.rkt")])

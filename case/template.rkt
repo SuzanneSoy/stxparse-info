@@ -9,4 +9,4 @@
   [(version< (version) "6.90.0.29")
     (begin)]
   [else
-    (my-include "template.rkt-6-90-0-29")])
+    (my-include "../6-90-0-29/racket/collects/racket/private/template.rkt")])
