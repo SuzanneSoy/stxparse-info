@@ -1,5 +1,6 @@
 #lang racket/base
-(require "../private/sc.rkt"
-         syntax/parse/private/keywords)
-(provide ~eh-var
-         define-eh-alternative-set)
+(#%require version-case
+           (for-syntax (only racket/base version)
+                       (only racket/base #%app #%datum))
+           stxparse-info/my-include)
+(my-include "../../" "/racket/collects/syntax/parse/experimental/eh.rkt")

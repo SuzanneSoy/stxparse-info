@@ -3,12 +3,4 @@
            (for-syntax (only racket/base version)
                        (only racket/base #%app #%datum))
            stxparse-info/my-include)
-(version-case
-  [(version< (version) "6.11.0.900")
-    (my-include "../../6-11/racket/collects/syntax/parse/private/lib.rkt")]
-  [(version< (version) "6.90.0.29")
-    (my-include "../../6-12/racket/collects/syntax/parse/private/lib.rkt")]
-  [(version< (version) "7.0.0.20")
-    (my-include "../../6-90-0-29/racket/collects/syntax/parse/private/lib.rkt")]
-  [else
-    (my-include "../../7-3-0-1/racket/collects/syntax/parse/private/lib.rkt")])
+(my-include "../../" "/racket/collects/syntax/parse/private/lib.rkt")
