@@ -12,6 +12,7 @@
                      "at-exp-lib")) ;; for the documentation only
 (define scribblings '(("scribblings/stxparse-info.scrbl" () ("Syntax Extensions"))))
 (define compile-omit-paths '("6-11" "6-12" "6-90-0-29" "7-0-0-20" "7-3-0-1"))
+(define test-omit-paths '("6-11" "6-12" "6-90-0-29" "7-0-0-20" "7-3-0-1"))
 (define pkg-desc "Description Here")
 (define version "0.0")
 (define pkg-authors '(Suzanne Soy))
