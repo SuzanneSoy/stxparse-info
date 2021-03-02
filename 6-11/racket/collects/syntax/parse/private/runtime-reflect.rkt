@@ -54,7 +54,9 @@ A Reified is
 (define (check-params who e-arity r-arity obj)
   (let ([e-pos (arity-minpos e-arity)]
         [e-kws (arity-minkws e-arity)])
-    (check-arity r-arity e-pos e-kws (lambda (msg) (error who "~a" msg)))))
+    (check-arity/neg r-arity e-pos e-kws
+                     (lambda (msg)
+                       (raise-mismatch-error who (string-append msg ": ") obj)))))
 
 (define (adapt-parser who esig0 rsig0 parser splicing?)
   (if (equal? esig0 rsig0)
