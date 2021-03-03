@@ -8,7 +8,7 @@
              "with-stx.rkt" racket/private/stxloc
              (for-syntax '#%kernel racket/private/small-scheme
                          racket/private/stx "stxcase.rkt"
-                         racket/private/stxloc))
+                         "stxloc.rkt"))
 
   (-define (check-duplicate-identifier names)
     (unless (and (list? names) (andmap identifier? names))

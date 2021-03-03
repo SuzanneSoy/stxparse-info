@@ -1,0 +1,636 @@
+From 2a8ee17ac795be472b75d807315476e81bf07a51 Mon Sep 17 00:00:00 2001
+From: Suzanne Soy <ligo@suzanne.soy>
+Date: Tue, 2 Mar 2021 21:19:51 +0000
+Subject: [PATCH 1/2] require paths
+
+---
+ .../racket/private/stxcase-scheme.rkt         |  9 ++++--
+ racket/collects/racket/private/stxcase.rkt    | 10 +++----
+ racket/collects/racket/private/stxloc.rkt     |  4 +--
+ racket/collects/racket/private/template.rkt   |  1 +
+ racket/collects/racket/private/with-stx.rkt   |  7 +++--
+ racket/collects/racket/syntax.rkt             |  3 +-
+ racket/collects/syntax/parse.rkt              |  3 +-
+ racket/collects/syntax/parse/debug.rkt        |  8 ++---
+ racket/collects/syntax/parse/define.rkt       |  4 +--
+ .../syntax/parse/experimental/contract.rkt    |  4 +--
+ .../collects/syntax/parse/experimental/eh.rkt |  2 +-
+ .../parse/experimental/private/substitute.rkt | 10 +++++++
+ .../syntax/parse/experimental/provide.rkt     |  6 ++--
+ .../syntax/parse/experimental/reflect.rkt     |  6 ++--
+ .../syntax/parse/experimental/specialize.rkt  |  4 +--
+ .../syntax/parse/experimental/splicing.rkt    |  6 ++--
+ .../syntax/parse/experimental/template.rkt    |  5 ++--
+ racket/collects/syntax/parse/private/lib.rkt  |  2 +-
+ .../collects/syntax/parse/private/litconv.rkt | 10 +++----
+ racket/collects/syntax/parse/private/opt.rkt  |  6 ++--
+ .../collects/syntax/parse/private/parse.rkt   | 18 +++++------
+ racket/collects/syntax/parse/private/rep.rkt  | 14 ++++-----
+ .../syntax/parse/private/residual.rkt         |  9 +++++-
+ .../syntax/parse/private/runtime-progress.rkt |  2 +-
+ .../syntax/parse/private/runtime-reflect.rkt  | 30 +++++++++++++++----
+ .../syntax/parse/private/runtime-report.rkt   |  6 ++--
+ .../collects/syntax/parse/private/runtime.rkt |  4 +--
+ racket/collects/syntax/parse/private/sc.rkt   | 10 +++----
+ 28 files changed, 123 insertions(+), 80 deletions(-)
+ create mode 100644 racket/collects/racket/private/template.rkt
+
+diff --git a/racket/collects/racket/private/stxcase-scheme.rkt b/racket/collects/racket/private/stxcase-scheme.rkt
+index 9f1a21abbb..5436c0691f 100644
+--- a/racket/collects/racket/private/stxcase-scheme.rkt
++++ b/racket/collects/racket/private/stxcase-scheme.rkt
+@@ -4,8 +4,10 @@
+ ;;  check-duplicate-identifier, and assembles everything we have so far
+ 
+ (module stxcase-scheme '#%kernel
+-  (#%require "small-scheme.rkt" "stx.rkt" "stxcase.rkt" "with-stx.rkt" "stxloc.rkt"
+-             (for-syntax '#%kernel "small-scheme.rkt" "stx.rkt" "stxcase.rkt"
++  (#%require racket/private/small-scheme racket/private/stx "stxcase.rkt"
++             "with-stx.rkt" racket/private/stxloc
++             (for-syntax '#%kernel racket/private/small-scheme
++                         racket/private/stx "stxcase.rkt"
+                          "stxloc.rkt"))
+ 
+   (-define (check-duplicate-identifier names)
+@@ -68,7 +70,8 @@
+         (syntax-arm stx #f #t)
+         (raise-argument-error 'syntax-protect "syntax?" stx)))
+ 
+-  (#%provide syntax datum (all-from "with-stx.rkt") (all-from "stxloc.rkt") 
++  (#%provide syntax datum (all-from "with-stx.rkt")
++             (all-from racket/private/stxloc) 
+              check-duplicate-identifier syntax-protect
+              syntax-rules syntax-id-rules
+              (for-syntax syntax-pattern-variable?)))
+diff --git a/racket/collects/racket/private/stxcase.rkt b/racket/collects/racket/private/stxcase.rkt
+index cc3b2ec158..ccc501593e 100644
+--- a/racket/collects/racket/private/stxcase.rkt
++++ b/racket/collects/racket/private/stxcase.rkt
+@@ -2,10 +2,10 @@
+ ;; syntax-case and syntax
+ 
+ (module stxcase '#%kernel
+-  (#%require "stx.rkt" "small-scheme.rkt" '#%paramz '#%unsafe
+-             "ellipses.rkt"
+-             (for-syntax "stx.rkt" "small-scheme.rkt"
+-                         "member.rkt" "sc.rkt" '#%kernel))
++  (#%require racket/private/stx racket/private/small-scheme '#%paramz '#%unsafe
++             racket/private/ellipses
++             (for-syntax racket/private/stx racket/private/small-scheme
++                         racket/private/member racket/private/sc '#%kernel))
+ 
+   (-define (datum->syntax/shape orig datum)
+      (if (syntax? datum)
+@@ -600,5 +600,5 @@
+   (-define-syntax syntax (lambda (stx) (gen-template stx #f)))
+   (-define-syntax datum (lambda (stx) (gen-template stx #t)))
+ 
+-  (#%provide (all-from "ellipses.rkt") syntax-case** syntax datum
++  (#%provide (all-from racket/private/ellipses) syntax-case** syntax datum
+              (for-syntax syntax-pattern-variable?)))
+diff --git a/racket/collects/racket/private/stxloc.rkt b/racket/collects/racket/private/stxloc.rkt
+index 0e0082a699..6444aa14b4 100644
+--- a/racket/collects/racket/private/stxloc.rkt
++++ b/racket/collects/racket/private/stxloc.rkt
+@@ -3,8 +3,8 @@
+ ;; syntax/loc
+ 
+ (module stxloc '#%kernel
+-  (#%require "qq-and-or.rkt" "stxcase.rkt" "define-et-al.rkt"
+-             (for-syntax '#%kernel "stxcase.rkt" "sc.rkt"))
++  (#%require racket/private/qq-and-or "stxcase.rkt" racket/private/define-et-al
++             (for-syntax '#%kernel "stxcase.rkt" racket/private/sc))
+ 
+   (begin-for-syntax
+     (define-values (transform-to-syntax-case**)
+diff --git a/racket/collects/racket/private/template.rkt b/racket/collects/racket/private/template.rkt
+new file mode 100644
+index 0000000000..7bc35af1c4
+--- /dev/null
++++ b/racket/collects/racket/private/template.rkt
+@@ -0,0 +1 @@
++#lang racket/base
+diff --git a/racket/collects/racket/private/with-stx.rkt b/racket/collects/racket/private/with-stx.rkt
+index 64ea885bb4..9dfa54682c 100644
+--- a/racket/collects/racket/private/with-stx.rkt
++++ b/racket/collects/racket/private/with-stx.rkt
+@@ -2,9 +2,10 @@
+ ;; with-syntax, generate-temporaries
+ 
+ (module with-stx '#%kernel
+-  (#%require "stx.rkt" "small-scheme.rkt" "stxcase.rkt"
+-             (for-syntax '#%kernel "stx.rkt" "stxcase.rkt" "stxloc.rkt" 
+-                         "sc.rkt" "qq-and-or.rkt" "cond.rkt"))
++  (#%require racket/private/stx racket/private/small-scheme "stxcase.rkt"
++             (for-syntax '#%kernel racket/private/stx "stxcase.rkt"
++                         racket/private/stxloc racket/private/sc
++                         racket/private/qq-and-or racket/private/cond))
+ 
+   (-define (with-syntax-fail stx)
+     (raise-syntax-error
+diff --git a/racket/collects/racket/syntax.rkt b/racket/collects/racket/syntax.rkt
+index af8c5c6412..99782d0216 100644
+--- a/racket/collects/racket/syntax.rkt
++++ b/racket/collects/racket/syntax.rkt
+@@ -1,5 +1,6 @@
+ #lang racket/base
+-(require (for-syntax racket/base
++(require (only-in "stxloc.rkt" syntax-case)
++         (for-syntax racket/base
+                      racket/private/sc))
+ (provide define/with-syntax
+ 
+diff --git a/racket/collects/syntax/parse.rkt b/racket/collects/syntax/parse.rkt
+index 6d72774e29..6712f0fae0 100644
+--- a/racket/collects/syntax/parse.rkt
++++ b/racket/collects/syntax/parse.rkt
+@@ -22,7 +22,8 @@
+             [syntax-local-syntax-parse-pattern-introduce
+              (-> syntax? syntax?)]))
+ 
+-  (define pattern-expander
++  (require (only-in (for-template syntax/parse) pattern-expander))
++  #;(define pattern-expander
+     (let ()
+       (struct pattern-expander (proc) #:transparent
+         #:omit-define-syntaxes
+diff --git a/racket/collects/syntax/parse/debug.rkt b/racket/collects/syntax/parse/debug.rkt
+index a816fd4c6e..efb87b914b 100644
+--- a/racket/collects/syntax/parse/debug.rkt
++++ b/racket/collects/syntax/parse/debug.rkt
+@@ -2,18 +2,18 @@
+ (require (for-syntax racket/base
+                      syntax/stx
+                      racket/syntax
+-                     "private/rep-data.rkt"
++                     syntax/parse/private/rep-data
+                      "private/rep.rkt"
+-                     "private/kws.rkt")
++                     syntax/parse/private/kws)
+          racket/list
+          racket/pretty
+          "../parse.rkt"
+-         (except-in syntax/parse/private/residual
++         (except-in stxparse-info/parse/private/residual
+                     prop:pattern-expander syntax-local-syntax-parse-pattern-introduce)
+          "private/runtime.rkt"
+          "private/runtime-progress.rkt"
+          "private/runtime-report.rkt"
+-         "private/kws.rkt")
++         syntax/parse/private/kws)
+ 
+ ;; No lazy loading for this module's dependencies.
+ 
+diff --git a/racket/collects/syntax/parse/define.rkt b/racket/collects/syntax/parse/define.rkt
+index 97c201000b..28e51486fd 100644
+--- a/racket/collects/syntax/parse/define.rkt
++++ b/racket/collects/syntax/parse/define.rkt
+@@ -1,10 +1,10 @@
+ #lang racket/base
+ (require (for-syntax racket/base
+-                     syntax/parse
++                     stxparse-info/parse
+                      "private/sc.rkt"))
+ (provide define-simple-macro
+          define-syntax-parser
+-         (for-syntax (all-from-out syntax/parse)))
++         (for-syntax (all-from-out stxparse-info/parse)))
+ 
+ (define-syntax (define-simple-macro stx)
+   (syntax-parse stx
+diff --git a/racket/collects/syntax/parse/experimental/contract.rkt b/racket/collects/syntax/parse/experimental/contract.rkt
+index b4dbec4107..5d5144b1a8 100644
+--- a/racket/collects/syntax/parse/experimental/contract.rkt
++++ b/racket/collects/syntax/parse/experimental/contract.rkt
+@@ -1,8 +1,8 @@
+ #lang racket/base
+-(require syntax/parse/pre
++(require stxparse-info/parse/pre
+          "provide.rkt"
+          syntax/contract
+-         (only-in syntax/parse/private/residual ;; keep abs. path
++         (only-in stxparse-info/parse/private/residual ;; keep abs. path
+                   this-context-syntax
+                   this-role)
+          racket/contract/base)
+diff --git a/racket/collects/syntax/parse/experimental/eh.rkt b/racket/collects/syntax/parse/experimental/eh.rkt
+index 305080721f..f8e1b09302 100644
+--- a/racket/collects/syntax/parse/experimental/eh.rkt
++++ b/racket/collects/syntax/parse/experimental/eh.rkt
+@@ -1,5 +1,5 @@
+ #lang racket/base
+ (require "../private/sc.rkt"
+-         "../private/keywords.rkt")
++         syntax/parse/private/keywords)
+ (provide ~eh-var
+          define-eh-alternative-set)
+diff --git a/racket/collects/syntax/parse/experimental/private/substitute.rkt b/racket/collects/syntax/parse/experimental/private/substitute.rkt
+index 20cb5726ba..2e11d58694 100644
+--- a/racket/collects/syntax/parse/experimental/private/substitute.rkt
++++ b/racket/collects/syntax/parse/experimental/private/substitute.rkt
+@@ -58,6 +58,16 @@ An VarRef is one of
+ 
+ ;; Used to indicate absent pvar in template; ?? catches
+ ;; Note: not an exn, don't need continuation marks
++#;(require (only-in rackunit require/expose))
++#;(require/expose syntax/parse/experimental/private/substitute
++                  (absent-pvar
++                   absent-pvar?
++                   absent-pvar-ctx
++                   absent-pvar-v
++                   absent-pvar-wanted-list?))
++;; this struct is only used in this file, and is not exported, so I guess it's
++;; ok to not steal the struct from syntax/parse/experimental/private/substitute
++;; Furthermore, the require/expose above does not work reliably.
+ (struct absent-pvar (ctx v wanted-list?))
+ 
+ ;; ============================================================
+diff --git a/racket/collects/syntax/parse/experimental/provide.rkt b/racket/collects/syntax/parse/experimental/provide.rkt
+index 8e5f234b2e..280a73d78a 100644
+--- a/racket/collects/syntax/parse/experimental/provide.rkt
++++ b/racket/collects/syntax/parse/experimental/provide.rkt
+@@ -4,10 +4,10 @@
+          syntax/location
+          (for-syntax racket/base
+                      racket/syntax
+-                     "../private/minimatch.rkt"
+-                     syntax/parse/pre
++                     syntax/parse/private/minimatch
++                     stxparse-info/parse/pre
+                      syntax/parse/private/residual-ct ;; keep abs. path
+-                     "../private/kws.rkt"
++                     syntax/parse/private/kws
+                      syntax/contract))
+ (provide provide-syntax-class/contract
+          syntax-class/c
+diff --git a/racket/collects/syntax/parse/experimental/reflect.rkt b/racket/collects/syntax/parse/experimental/reflect.rkt
+index b92f53ecfd..460d96478d 100644
+--- a/racket/collects/syntax/parse/experimental/reflect.rkt
++++ b/racket/collects/syntax/parse/experimental/reflect.rkt
+@@ -5,10 +5,10 @@
+                      syntax/parse/private/residual-ct) ;; keep abs.path
+          racket/contract/base
+          racket/contract/combinator
+-         "../private/minimatch.rkt"
+-         "../private/keywords.rkt"
++         syntax/parse/private/minimatch
++         syntax/parse/private/keywords
+          "../private/runtime-reflect.rkt"
+-         "../private/kws.rkt")
++         syntax/parse/private/kws)
+ (begin-for-syntax
+  (lazy-require
+   [syntax/parse/private/rep-data ;; keep abs. path
+diff --git a/racket/collects/syntax/parse/experimental/specialize.rkt b/racket/collects/syntax/parse/experimental/specialize.rkt
+index 636e18b480..72f1e6c4e2 100644
+--- a/racket/collects/syntax/parse/experimental/specialize.rkt
++++ b/racket/collects/syntax/parse/experimental/specialize.rkt
+@@ -1,8 +1,8 @@
+ #lang racket/base
+ (require (for-syntax racket/base
+                      racket/syntax
+-                     "../private/kws.rkt"
+-                     "../private/rep-data.rkt"
++                     syntax/parse/private/kws
++                     syntax/parse/private/rep-data
+                      "../private/rep.rkt")
+          "../private/runtime.rkt")
+ (provide define-syntax-class/specialize)
+diff --git a/racket/collects/syntax/parse/experimental/splicing.rkt b/racket/collects/syntax/parse/experimental/splicing.rkt
+index f9105c1f24..e0694aaec4 100644
+--- a/racket/collects/syntax/parse/experimental/splicing.rkt
++++ b/racket/collects/syntax/parse/experimental/splicing.rkt
+@@ -1,9 +1,9 @@
+ #lang racket/base
+ (require (for-syntax racket/base
+-                     syntax/parse
++                     stxparse-info/parse
+                      racket/lazy-require
+-                     "../private/kws.rkt")
+-         syntax/parse/private/residual) ;; keep abs. path
++                     syntax/parse/private/kws)
++         stxparse-info/parse/private/residual) ;; keep abs. path
+ (provide define-primitive-splicing-syntax-class)
+ 
+ (begin-for-syntax
+diff --git a/racket/collects/syntax/parse/experimental/template.rkt b/racket/collects/syntax/parse/experimental/template.rkt
+index 926e5ab3fb..aaaa599602 100644
+--- a/racket/collects/syntax/parse/experimental/template.rkt
++++ b/racket/collects/syntax/parse/experimental/template.rkt
+@@ -4,8 +4,9 @@
+                      racket/syntax
+                      syntax/parse/private/minimatch
+                      racket/private/stx ;; syntax/stx
+-                     racket/private/sc)
+-         syntax/parse/private/residual
++                     racket/private/sc
++                     racket/struct)
++         stxparse-info/parse/private/residual
+          "private/substitute.rkt")
+ (provide template
+          template/loc
+diff --git a/racket/collects/syntax/parse/private/lib.rkt b/racket/collects/syntax/parse/private/lib.rkt
+index f330be95d8..647e201547 100644
+--- a/racket/collects/syntax/parse/private/lib.rkt
++++ b/racket/collects/syntax/parse/private/lib.rkt
+@@ -1,6 +1,6 @@
+ #lang racket/base
+ (require "sc.rkt"
+-         "keywords.rkt"
++         syntax/parse/private/keywords
+          (for-syntax racket/base))
+ 
+ (provide identifier
+diff --git a/racket/collects/syntax/parse/private/litconv.rkt b/racket/collects/syntax/parse/private/litconv.rkt
+index 9197505856..559791f131 100644
+--- a/racket/collects/syntax/parse/private/litconv.rkt
++++ b/racket/collects/syntax/parse/private/litconv.rkt
+@@ -3,14 +3,14 @@
+                      racket/lazy-require
+                      "sc.rkt"
+                      "lib.rkt"
+-                     "kws.rkt"
++                     syntax/parse/private/kws
+                      racket/syntax)
+          syntax/parse/private/residual-ct ;; keep abs. path
+-         syntax/parse/private/residual)   ;; keep abs. path
++         stxparse-info/parse/private/residual)   ;; keep abs. path
+ (begin-for-syntax
+  (lazy-require
+   [syntax/private/keyword (options-select-value parse-keyword-options)]
+-  [syntax/parse/private/rep ;; keep abs. path
++  [stxparse-info/parse/private/rep ;; keep abs. path
+    (parse-kw-formals
+     check-conventions-rules
+     check-datum-literals-list
+@@ -18,7 +18,7 @@
+ ;; FIXME: workaround for phase>0 bug in racket/runtime-path (and thus lazy-require)
+ ;; Without this, dependencies don't get collected.
+ (require racket/runtime-path racket/syntax (for-meta 2 '#%kernel))
+-(define-runtime-module-path-index _unused_ 'syntax/parse/private/rep)
++(define-runtime-module-path-index _unused_ 'stxparse-info/parse/private/rep)
+ 
+ (provide define-conventions
+          define-literal-set
+@@ -215,7 +215,7 @@ change between when define-literal-set is compiled and the comparison
+ involving L. For example:
+ 
+   (module M racket
+-    (require syntax/parse)
++    (require stxparse-info/parse)
+     (define-literal-set LS (lambda))
+     (require (only-in some-other-lang lambda))
+     .... LS ....)
+diff --git a/racket/collects/syntax/parse/private/opt.rkt b/racket/collects/syntax/parse/private/opt.rkt
+index 0dc2460107..0c047882e7 100644
+--- a/racket/collects/syntax/parse/private/opt.rkt
++++ b/racket/collects/syntax/parse/private/opt.rkt
+@@ -2,9 +2,9 @@
+ (require racket/syntax
+          racket/pretty
+          syntax/parse/private/residual-ct ;; keep abs. path
+-         "minimatch.rkt"
+-         "rep-patterns.rkt"
+-         "kws.rkt")
++         syntax/parse/private/minimatch
++         syntax/parse/private/rep-patterns
++         syntax/parse/private/kws)
+ (provide (struct-out pk1)
+          (rename-out [optimize-matrix0 optimize-matrix]))
+ 
+diff --git a/racket/collects/syntax/parse/private/parse.rkt b/racket/collects/syntax/parse/private/parse.rkt
+index db71140242..9e1652c87f 100644
+--- a/racket/collects/syntax/parse/private/parse.rkt
++++ b/racket/collects/syntax/parse/private/parse.rkt
+@@ -4,21 +4,21 @@
+                      syntax/private/id-table
+                      syntax/keyword
+                      racket/syntax
+-                     "minimatch.rkt"
+-                     "rep-attrs.rkt"
+-                     "rep-data.rkt"
+-                     "rep-patterns.rkt"
++                     syntax/parse/private/minimatch
++                     syntax/parse/private/rep-attrs
++                     syntax/parse/private/rep-data
++                     syntax/parse/private/rep-patterns
+                      "rep.rkt"
+-                     "kws.rkt"
++                     syntax/parse/private/kws
+                      "opt.rkt"
+                      "txlift.rkt")
+-         "keywords.rkt"
++         syntax/parse/private/keywords
+          racket/syntax
+          racket/stxparam
+          syntax/stx
+-         syntax/parse/private/residual ;; keep abs. path
+-         syntax/parse/private/runtime  ;; keep abs.path 
+-         syntax/parse/private/runtime-reflect) ;; keep abs. path
++         stxparse-info/parse/private/residual ;; keep abs. path
++         stxparse-info/parse/private/runtime  ;; keep abs.path 
++         stxparse-info/parse/private/runtime-reflect) ;; keep abs. path
+ 
+ ;; ============================================================
+ 
+diff --git a/racket/collects/syntax/parse/private/rep.rkt b/racket/collects/syntax/parse/private/rep.rkt
+index cc32c0459f..9327159037 100644
+--- a/racket/collects/syntax/parse/private/rep.rkt
++++ b/racket/collects/syntax/parse/private/rep.rkt
+@@ -1,23 +1,23 @@
+ #lang racket/base
+ (require (for-template racket/base
+                        syntax/parse/private/keywords
+-                       syntax/parse/private/residual ;; keep abs. path
+-                       syntax/parse/private/runtime)
++                       stxparse-info/parse/private/residual ;; keep abs. path
++                       stxparse-info/parse/private/runtime)
+          racket/list
+          racket/contract/base
+          "make.rkt"
+-         "minimatch.rkt"
++         syntax/parse/private/minimatch
+          syntax/private/id-table
+          syntax/stx
+          syntax/keyword
+          racket/syntax
+          racket/struct
+          "txlift.rkt"
+-         "rep-attrs.rkt"
+-         "rep-data.rkt"
+-         "rep-patterns.rkt"
++         syntax/parse/private/rep-attrs
++         syntax/parse/private/rep-data
++         syntax/parse/private/rep-patterns
+          syntax/parse/private/residual-ct ;; keep abs. path
+-         "kws.rkt")
++         syntax/parse/private/kws)
+ 
+ ;; Error reporting
+ ;; All entry points should have explicit, mandatory #:context arg
+diff --git a/racket/collects/syntax/parse/private/residual.rkt b/racket/collects/syntax/parse/private/residual.rkt
+index baea0658a0..d53cfb4661 100644
+--- a/racket/collects/syntax/parse/private/residual.rkt
++++ b/racket/collects/syntax/parse/private/residual.rkt
+@@ -21,7 +21,14 @@
+           attribute-mapping-depth
+           attribute-mapping-syntax?)
+ 
+- (define-struct attribute-mapping (var name depth syntax?)
++ (require (only-in (for-template syntax/parse/private/residual)
++                   make-attribute-mapping
++                   attribute-mapping?
++                   attribute-mapping-var
++                   attribute-mapping-name
++                   attribute-mapping-depth
++                   attribute-mapping-syntax?))
++ #;(define-struct attribute-mapping (var name depth syntax?)
+    #:omit-define-syntaxes
+    #:property prop:procedure
+    (lambda (self stx)
+diff --git a/racket/collects/syntax/parse/private/runtime-progress.rkt b/racket/collects/syntax/parse/private/runtime-progress.rkt
+index ba8eebcb18..f76f154314 100644
+--- a/racket/collects/syntax/parse/private/runtime-progress.rkt
++++ b/racket/collects/syntax/parse/private/runtime-progress.rkt
+@@ -1,6 +1,6 @@
+ #lang racket/base
+ (require racket/list
+-         "minimatch.rkt")
++         syntax/parse/private/minimatch)
+ (provide ps-empty
+          ps-add-car
+          ps-add-cdr
+diff --git a/racket/collects/syntax/parse/private/runtime-reflect.rkt b/racket/collects/syntax/parse/private/runtime-reflect.rkt
+index 63dc1bb996..04d87f0f78 100644
+--- a/racket/collects/syntax/parse/private/runtime-reflect.rkt
++++ b/racket/collects/syntax/parse/private/runtime-reflect.rkt
+@@ -1,8 +1,8 @@
+ #lang racket/base
+-(require syntax/parse/private/residual ;; keep abs. path
++(require stxparse-info/parse/private/residual ;; keep abs. path
+          (only-in syntax/parse/private/residual-ct ;; keep abs. path
+                   attr-name attr-depth)
+-         "kws.rkt")
++         syntax/parse/private/kws)
+ (provide reflect-parser
+          (struct-out reified)
+          (struct-out reified-syntax-class)
+@@ -12,10 +12,28 @@
+ A Reified is
+   (reified symbol ParserFunction nat (listof (list symbol nat)))
+ |#
+-(define-struct reified-base (name) #:transparent)
+-(define-struct (reified reified-base) (parser arity signature))
+-(define-struct (reified-syntax-class reified) ())
+-(define-struct (reified-splicing-syntax-class reified) ())
++(require (only-in syntax/parse/private/runtime-reflect
++                  reified
++                  reified?
++                  reified-parser
++                  reified-arity
++                  reified-signature
++                  make-reified
++                  struct:reified
++                  
++                  reified-syntax-class
++                  reified-syntax-class?
++                  make-reified-syntax-class
++                  struct:reified-syntax-class
++                  
++                  reified-splicing-syntax-class
++                  reified-splicing-syntax-class?
++                  make-reified-splicing-syntax-class
++                  struct:reified-splicing-syntax-class))
++#;(define-struct reified-base (name) #:transparent)
++#;(define-struct (reified reified-base) (parser arity signature))
++#;(define-struct (reified-syntax-class reified) ())
++#;(define-struct (reified-splicing-syntax-class reified) ())
+ 
+ (define (reflect-parser obj e-arity e-attrs splicing?)
+   ;; e-arity represents single call; min and max are same
+diff --git a/racket/collects/syntax/parse/private/runtime-report.rkt b/racket/collects/syntax/parse/private/runtime-report.rkt
+index 8029e9f6aa..87429aee29 100644
+--- a/racket/collects/syntax/parse/private/runtime-report.rkt
++++ b/racket/collects/syntax/parse/private/runtime-report.rkt
+@@ -4,9 +4,9 @@
+          syntax/stx
+          racket/struct
+          syntax/srcloc
+-         "minimatch.rkt"
+-         syntax/parse/private/residual
+-         "kws.rkt")
++         syntax/parse/private/minimatch
++         stxparse-info/parse/private/residual
++         syntax/parse/private/kws)
+ (provide call-current-failure-handler
+          current-failure-handler
+          invert-failure
+diff --git a/racket/collects/syntax/parse/private/runtime.rkt b/racket/collects/syntax/parse/private/runtime.rkt
+index c4a1ce9570..98764b189c 100644
+--- a/racket/collects/syntax/parse/private/runtime.rkt
++++ b/racket/collects/syntax/parse/private/runtime.rkt
+@@ -1,13 +1,13 @@
+ #lang racket/base
+ (require racket/stxparam
+-         syntax/parse/private/residual ;; keep abs. path
++         stxparse-info/parse/private/residual ;; keep abs. path
+          (for-syntax racket/base
+                      racket/list
+                      syntax/kerncase
+                      syntax/strip-context
+                      racket/private/sc
+                      racket/syntax
+-                     "rep-data.rkt"))
++                     syntax/parse/private/rep-data))
+ 
+ (provide with
+          fail-handler
+diff --git a/racket/collects/syntax/parse/private/sc.rkt b/racket/collects/syntax/parse/private/sc.rkt
+index fc8abf7907..dc6bdda811 100644
+--- a/racket/collects/syntax/parse/private/sc.rkt
++++ b/racket/collects/syntax/parse/private/sc.rkt
+@@ -1,12 +1,12 @@
+ #lang racket/base
+ (require (for-syntax racket/base
+                      racket/lazy-require)
+-         "keywords.rkt")
++         syntax/parse/private/keywords)
+ 
+ ;; keep and keep as abs. path -- lazy-loaded macros produce references to this
+ ;; must be required via *absolute module path* from any disappearing module
+ ;; (so for consistency etc, require absolutely from all modules)
+-(require syntax/parse/private/residual
++(require stxparse-info/parse/private/residual
+          racket/syntax
+          racket/stxparam
+          syntax/stx)
+@@ -16,7 +16,7 @@
+   ;; load macro transformers lazily via identifier
+   ;; This module path must also be absolute (not sure why,
+   ;; but it definitely breaks on relative module path).
+-  [syntax/parse/private/parse-aux
++  [stxparse-info/parse/private/parse-aux
+    (id:define-syntax-class
+     id:define-splicing-syntax-class
+     id:define-integrable-syntax-class
+@@ -29,7 +29,7 @@
+ ;; FIXME: workaround for phase>0 bug in racket/runtime-path (and thus lazy-require)
+ ;; Without this, dependencies don't get collected.
+ (require racket/runtime-path (for-meta 2 '#%kernel))
+-(define-runtime-module-path-index _unused_ 'syntax/parse/private/parse-aux)
++(define-runtime-module-path-index _unused_ 'stxparse-info/parse/private/parse-aux)
+ 
+ (provide define-syntax-class
+          define-splicing-syntax-class
+@@ -38,7 +38,7 @@
+          syntax-parser
+          define/syntax-parse
+ 
+-         (except-out (all-from-out "keywords.rkt")
++         (except-out (all-from-out syntax/parse/private/keywords)
+                      ~reflect
+                      ~splicing-reflect
+                      ~eh-var)
+-- 
+2.30.0
+
