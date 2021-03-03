@@ -42,5 +42,7 @@
              #,(my-include1 (loc (string-append -updir "6-90-0-29" -filename)))]
            [(version< (version) "7.3.0.1")
              #,(my-include1 (loc (string-append -updir "7-0-0-20" -filename)))]
+           [(version< (version) "8.0")
+             #,(my-include1 (loc (string-append -updir "7-3-0-1" -filename)))]
            [else
-             #,(my-include1 (loc (string-append -updir "7-3-0-1" -filename)))]))]))
+             #,(my-include1 (loc (string-append -updir "8-0" -filename)))]))]))

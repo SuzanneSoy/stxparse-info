@@ -1,0 +1,197 @@
+From 9e686f19b9139ffd106ce6937d80153ebcaf6f60 Mon Sep 17 00:00:00 2001
+From: Suzanne Soy <ligo@suzanne.soy>
+Date: Tue, 2 Mar 2021 21:20:46 +0000
+Subject: [PATCH 2/2] auto-syntax-e and template-metafunction stuff
+
+---
+ racket/collects/racket/private/stxcase.rkt      | 14 ++++++++++----
+ racket/collects/racket/syntax.rkt               |  9 ++++++---
+ .../syntax/parse/experimental/template.rkt      | 17 +++++++++++++++--
+ racket/collects/syntax/parse/private/parse.rkt  |  7 ++++++-
+ .../collects/syntax/parse/private/residual.rkt  |  4 +++-
+ .../collects/syntax/parse/private/runtime.rkt   | 12 ++++++++----
+ 6 files changed, 48 insertions(+), 15 deletions(-)
+
+diff --git racket/collects/racket/private/stxcase.rkt racket/collects/racket/private/stxcase.rkt
+index 2ac2ec85a6..8101d34c3d 100644
+--- racket/collects/racket/private/stxcase.rkt
++++ racket/collects/racket/private/stxcase.rkt
+@@ -4,8 +4,10 @@
+ (module stxcase '#%kernel
+   (#%require racket/private/stx racket/private/define-et-al racket/private/qq-and-or racket/private/cond '#%paramz '#%unsafe
+              racket/private/ellipses
++             stxparse-info/current-pvars
+              (for-syntax racket/private/stx racket/private/define-et-al racket/private/qq-and-or racket/private/cond
+-                         racket/private/gen-temp racket/private/sc '#%kernel))
++                         racket/private/gen-temp racket/private/sc '#%kernel
++                         auto-syntax-e/utils))
+ 
+   (-define interp-match
+      (lambda (pat e literals immediate=?)
+@@ -346,7 +348,7 @@
+                                                           (list
+                                                            (if s-exp?
+                                                                (quote-syntax make-s-exp-mapping)
+-                                                               (quote-syntax make-syntax-mapping))
++                                                               (quote-syntax make-auto-pvar))
+                                                            ;; Tell it the shape of the variable:
+                                                            (let loop ([var unflat-pattern-var][d 0])
+                                                              (if (syntax? var)
+@@ -361,9 +363,13 @@
+                                              null
+                                              (if fender
+                                                  (list (quote-syntax if) fender
+-                                                       answer
++                                                       (list (quote-syntax with-pvars)
++                                                             pattern-vars
++                                                             answer)
+                                                        do-try-next)
+-                                                 answer)))
++                                                 (list (quote-syntax with-pvars)
++                                                       pattern-vars
++                                                       answer))))
+                                            do-try-next))])
+                               (if fender
+                                   (list
+diff --git racket/collects/racket/syntax.rkt racket/collects/racket/syntax.rkt
+index 4aee14d23d..54329c54f7 100644
+--- racket/collects/racket/syntax.rkt
++++ racket/collects/racket/syntax.rkt
+@@ -1,7 +1,9 @@
+ #lang racket/base
+ (require (only-in "stxloc.rkt" syntax-case)
++         stxparse-info/current-pvars
+          (for-syntax racket/base
+-                     racket/private/sc))
++                     racket/private/sc
++                     auto-syntax-e/utils))
+ (provide define/with-syntax
+ 
+          current-recorded-disappeared-uses
+@@ -44,8 +46,9 @@
+                     (with-syntax ([pattern rhs])
+                       (values (pvar-value pvar) ...)))
+                   (define-syntax pvar
+-                    (make-syntax-mapping 'depth (quote-syntax valvar)))
+-                  ...)))]))
++                    (make-auto-pvar 'depth (quote-syntax valvar)))
++                  ...
++                  (define-pvars pvar ...))))]))
+ ;; Ryan: alternative name: define/syntax-pattern ??
+ 
+ ;; auxiliary macro
+diff --git racket/collects/syntax/parse/experimental/template.rkt racket/collects/syntax/parse/experimental/template.rkt
+index b52fd80e6e..160eccc84b 100644
+--- racket/collects/syntax/parse/experimental/template.rkt
++++ racket/collects/syntax/parse/experimental/template.rkt
+@@ -1,5 +1,6 @@
+ #lang racket/base
+-(require (for-syntax racket/base)
++(require (for-syntax racket/base
++                     auto-syntax-e/utils)
+          (only-in racket/private/template
+                   metafunction))
+ (provide (rename-out [syntax template]
+@@ -26,10 +27,22 @@
+ (define current-template-metafunction-introducer
+   (make-parameter (lambda (stx) (if (syntax-transforming?) (syntax-local-introduce stx) stx))))
+ 
++(define old-template-metafunction-introducer
++  (make-parameter #f))
++
++(define (syntax-local-template-metafunction-introduce stx)
++  (let ([mark (current-template-metafunction-introducer)]
++        [old-mark (old-template-metafunction-introducer)])
++    (unless old-mark
++      (error 'syntax-local-template-metafunction-introduce
++             "must be called within the dynamic extent of a template metafunction"))
++    (mark (old-mark stx))))
++
+ (define ((make-hygienic-metafunction transformer) stx)
+   (define mark (make-syntax-introducer))
+   (define old-mark (current-template-metafunction-introducer))
+-  (parameterize ((current-template-metafunction-introducer mark))
++  (parameterize ((current-template-metafunction-introducer mark)
++                 (old-template-metafunction-introducer old-mark))
+     (define r (call-with-continuation-barrier (lambda () (transformer (mark (old-mark stx))))))
+     (unless (syntax? r)
+       (raise-syntax-error #f "result of template metafunction was not syntax" stx))
+diff --git racket/collects/syntax/parse/private/parse.rkt racket/collects/syntax/parse/private/parse.rkt
+index e14cc3aea9..7e5c61dee1 100644
+--- racket/collects/syntax/parse/private/parse.rkt
++++ racket/collects/syntax/parse/private/parse.rkt
+@@ -435,7 +435,12 @@ Conventions:
+                         ((body-sequence)
+                          (syntax-case rest ()
+                            [(e0 e ...)
+-                            #'(let () e0 e ...)]
++                            ;; Should we use a shadower (works on the whole file, unhygienically),
++                            ;; or use the context of the syntax-parse identifier?
++                            (let ([the-#%intdef-begin (datum->syntax #'ctx '#%intdef-begin)])
++                              (if (syntax-local-value the-#%intdef-begin (λ () #f)) ;; Defined as a macro
++                                  #`(let () (#,the-#%intdef-begin e0 e ...))
++                                  #'(let () e0 e ...)))]
+                            [_ (raise-syntax-error #f "expected non-empty clause body"
+                                                   #'ctx clause)]))
+                         (else
+diff --git racket/collects/syntax/parse/private/residual.rkt racket/collects/syntax/parse/private/residual.rkt
+index 88a5911810..1c78afe79f 100644
+--- racket/collects/syntax/parse/private/residual.rkt
++++ racket/collects/syntax/parse/private/residual.rkt
+@@ -18,7 +18,9 @@
+ 
+ (require "runtime-progress.rkt"
+          "3d-stx.rkt"
+-         syntax/stx)
++         auto-syntax-e
++         syntax/stx
++         stxparse-info/current-pvars)
+ 
+ (provide (all-from-out "runtime-progress.rkt")
+ 
+diff --git racket/collects/syntax/parse/private/runtime.rkt racket/collects/syntax/parse/private/runtime.rkt
+index 41b321499e..90d7ea88f4 100644
+--- racket/collects/syntax/parse/private/runtime.rkt
++++ racket/collects/syntax/parse/private/runtime.rkt
+@@ -1,11 +1,13 @@
+ #lang racket/base
+ (require racket/stxparam
+          stxparse-info/parse/private/residual ;; keep abs. path
++         stxparse-info/current-pvars
+          (for-syntax racket/base
+                      racket/list
+                      syntax/kerncase
+                      syntax/strip-context
+                      racket/private/sc
++                     auto-syntax-e/utils
+                      racket/syntax
+                      syntax/parse/private/rep-data))
+ 
+@@ -111,9 +113,10 @@ residual.rkt.
+                 ...)
+                ([(vtmp) value] ...)
+              (letrec-syntaxes+values
+-                 ([(name) (make-syntax-mapping 'depth (quote-syntax stmp))] ...)
++                 ([(name) (make-auto-pvar 'depth (quote-syntax stmp))] ...)
+                  ()
+-               . body))))]))
++               (with-pvars (name ...)
++                 . body)))))]))
+ 
+ ;; (let-attributes* (([id num] ...) (expr ...)) expr) : expr
+ ;; Special case: empty attrs need not match number of value exprs.
+@@ -147,8 +150,9 @@ residual.rkt.
+                     (attribute-mapping (quote-syntax vtmp) 'name 'depth
+                                        (if 'syntax? #f (quote-syntax check-attr-value))))
+                   ...
+-                  (define-syntax name (make-syntax-mapping 'depth (quote-syntax stmp)))
+-                  ...)))]))
++                  (define-syntax name (make-auto-pvar 'depth (quote-syntax stmp)))
++                  ...
++                  (define-pvars name ...))))]))
+ 
+ (define-syntax-rule (phase-of-enclosing-module)
+   (variable-reference->module-base-phase
+-- 
+2.30.0
+
