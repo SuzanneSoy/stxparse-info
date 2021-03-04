@@ -15,5 +15,5 @@
 (define test-omit-paths '("6-11" "6-12" "6-90-0-29" "7-0-0-20" "7-3-0-1" "7-4" "8-0"))
 (define pkg-desc "Description Here")
 (define version "0.0")
-(define pkg-authors '(Suzanne Soy))
+(define pkg-authors '(|Suzanne Soy|))
 
