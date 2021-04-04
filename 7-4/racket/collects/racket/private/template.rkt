@@ -1,4 +1,7 @@
-(module template '#%kernel
+#lang racket/base
+(require racket/private/template)
+(provide (all-from-out racket/private/template))
+#;(module template '#%kernel
 (#%require racket/private/stx racket/private/small-scheme racket/private/performance-hint
            (rename racket/private/small-scheme define -define)
            (rename racket/private/small-scheme define-syntax -define-syntax)
