@@ -1,13 +1,11 @@
 #lang racket/base
 (require racket/stxparam
          stxparse-info/parse/private/residual ;; keep abs. path
-         stxparse-info/current-pvars
          (for-syntax racket/base
                      racket/list
                      syntax/kerncase
                      syntax/strip-context
                      racket/private/sc
-                     auto-syntax-e/utils
                      racket/syntax
                      syntax/parse/private/rep-data))
 
@@ -113,10 +111,9 @@ residual.rkt.
                 ...)
                ([(vtmp) value] ...)
              (letrec-syntaxes+values
-                 ([(name) (make-auto-pvar 'depth (quote-syntax stmp))] ...)
+                 ([(name) (make-syntax-mapping 'depth (quote-syntax stmp))] ...)
                  ()
-               (with-pvars (name ...)
-                 . body)))))]))
+               . body))))]))
 
 ;; (let-attributes* (([id num] ...) (expr ...)) expr) : expr
 ;; Special case: empty attrs need not match number of value exprs.
@@ -150,9 +147,8 @@ residual.rkt.
                     (attribute-mapping (quote-syntax vtmp) 'name 'depth
                                        (if 'syntax? #f (quote-syntax check-attr-value))))
                   ...
-                  (define-syntax name (make-auto-pvar 'depth (quote-syntax stmp)))
-                  ...
-                  (define-pvars name ...))))]))
+                  (define-syntax name (make-syntax-mapping 'depth (quote-syntax stmp)))
+                  ...)))]))
 
 (define-syntax-rule (phase-of-enclosing-module)
   (variable-reference->module-base-phase

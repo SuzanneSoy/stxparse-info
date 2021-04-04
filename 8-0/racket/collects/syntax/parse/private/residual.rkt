@@ -10,7 +10,7 @@
 (require (for-syntax racket/private/sc syntax/parse/private/residual-ct))
 (provide (for-syntax (all-from-out syntax/parse/private/residual-ct)))
 
-(require "../../case/template.rkt")
+(require racket/private/template)
 (provide (for-syntax attribute-mapping attribute-mapping?))
 
 ;; ============================================================
@@ -18,9 +18,7 @@
 
 (require "runtime-progress.rkt"
          "3d-stx.rkt"
-         auto-syntax-e
-         syntax/stx
-         stxparse-info/current-pvars)
+         syntax/stx)
 
 (provide (all-from-out "runtime-progress.rkt")
 
